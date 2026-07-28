@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tudo em 1 - Free Online Tools</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">tudoin1<span>.com</span></div>
+    <nav>
+      <ul>
+        <li><a href="#pdf-tools">PDF Tools</a></li>
+        <li><a href="#calculators">Calculators</a></li>
+        <li><a href="#utilities">Utilities</a></li>
+        <li><a href="#ai-tools">AI Tools</a></li>
+        <li><a href="#dev-tools">Developer Tools</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Top Banner Ad -->
+  <div class="adsense-slot top-banner">
+    <!-- Google AdSense Top Banner Placeholder -->
+    <p>[AdSense Top Banner Slot]</p>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>All-in-One Free Online Tools</h1>
+    <p>Fast, simple, and powerful utilities for everyday tasks — all in one place.</p>
+  </section>
+
+  <!-- Mid-page Ad -->
+  <div class="adsense-slot mid-banner">
+    <!-- Google AdSense Mid Content Placeholder -->
+    <p>[AdSense Mid Content Slot]</p>
+  </div>
+
+  <!-- Categories -->
+  <main>
+    <section id="pdf-tools" class="category">
+      <h2>📄 PDF Tools</h2>
+      <ul>
+        <li><a href="pdf-merger.html">PDF Merger</a></li>
+        <li><a href="pdf-splitter.html">PDF Splitter</a></li>
+        <li><a href="pdf-compressor.html">PDF Compressor</a></li>
+        <li><a href="pdf-to-docx.html">PDF to DOCX</a></li>
+        <li><a href="docx-to-pdf.html">DOCX to PDF</a></li>
+        <li><a href="txt-to-pdf.html">TXT to PDF</a></li>
+        <li><a href="jpg-to-pdf.html">JPG/PNG to PDF</a></li>
+        <li><a href="pdf-to-jpg.html">PDF to JPG/PNG</a></li>
+      </ul>
+    </section>
+
+    <!-- Sidebar Ad -->
+    <aside class="adsense-slot sidebar">
+      <!-- Google AdSense Sidebar Placeholder -->
+      <p>[AdSense Sidebar Slot]</p>
+    </aside>
+
+    <section id="calculators" class="category">
+      <h2>💰 Financial & Business Calculators</h2>
+      <ul>
+        <li><a href="mortgage.html">Mortgage Calculator</a></li>
+        <li><a href="loan.html">Loan Calculator</a></li>
+        <li><a href="interest.html">Interest Calculator</a></li>
+        <li><a href="savings.html">Savings Calculator</a></li>
+        <li><a href="currency.html">Currency Converter</a></li>
+        <li><a href="salary.html">Salary/Income Tax Calculator</a></li>
+        <li><a href="roi.html">ROI Calculator</a></li>
+      </ul>
+    </section>
+
+    <section id="utilities" class="category">
+      <h2>🛠️ Everyday Utilities</h2>
+      <ul>
+        <li><a href="qr.html">QR Code Generator</a></li>
+        <li><a href="password.html">Password Generator</a></li>
+        <li><a href="unit.html">Unit Converter</a></li>
+        <li><a href="age.html">Age Calculator</a></li>
+        <li><a href="bmi.html">BMI Calculator</a></li>
+        <li><a href="random.html">Random Number Generator</a></li>
+        <li><a href="textcase.html">Text Case Converter</a></li>
+        <li><a href="wordcount.html">Word/Character Counter</a></li>
+        <li><a href="timer.html">Stopwatch / Timer / Pomodoro</a></li>
+      </ul>
+    </section>
+
+    <section id="ai-tools" class="category">
+      <h2>🤖 AI Mini Tools</h2>
+      <ul>
+        <li><a href="summarizer.html">AI Text Summarizer</a></li>
+        <li><a href="paraphraser.html">AI Paraphraser</a></li>
+        <li><a href="namegen.html">AI Name Generator</a></li>
+        <li><a href="resume.html">AI Resume Bullet Generator</a></li>
+        <li><a href="jokes.html">AI Joke Generator</a></li>
+        <li><a href="story.html">AI Story Generator</a></li>
+      </ul>
+    </section>
+
+    <section id="dev-tools" class="category">
+      <h2>🧑‍💻 Developer Tools</h2>
+      <ul>
+        <li><a href="json.html">JSON Formatter</a></li>
+        <li><a href="base64.html">Base64 Encoder/Decoder</a></li>
+        <li><a href="minifier.html">HTML/CSS/JS Minifier</a></li>
+        <li><a href="regex.html">Regex Tester</a></li>
+        <li><a href="color.html">Color Picker / HEX ↔ RGB Converter</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Bottom Banner Ad -->
+  <div class="adsense-slot bottom-banner">
+    <!-- Google AdSense Bottom Banner Placeholder -->
+    <p>[AdSense Bottom Banner Slot]</p>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 tudoin1.com | All-in-One Free Tools</p>
+    <p>Made for everyone, everywhere.</p>
+  </footer>
+</body>
+</html>

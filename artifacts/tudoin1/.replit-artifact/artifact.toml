@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "tudoin1.com – Free Online Tools"
+version = "1.0.0"
+id = "artifacts/tudoin1"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18264
+
+[services.development]
+run = "pnpm --filter @workspace/tudoin1 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tudoin1", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tudoin1/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18264"
+BASE_PATH = "/"

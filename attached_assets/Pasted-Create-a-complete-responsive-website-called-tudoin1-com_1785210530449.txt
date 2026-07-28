@@ -1,0 +1,71 @@
+Create a complete responsive website called "tudoin1.com". 
+The site must be a professional, clean, fast-loading "All-in-One Utility Tool Hub" with no games. 
+It should have a modern design (light theme, simple navigation bar, footer with contact info, and mobile-friendly layout). 
+The homepage should introduce the site as "Tudo em 1 – Free Online Tools" with categories and links to each tool.
+
+The site must include the following categories and tools:
+
+📄 PDF Tools:
+- PDF Merger
+- PDF Splitter
+- PDF Compressor
+- PDF to DOCX
+- DOCX to PDF
+- TXT to PDF
+- JPG/PNG to PDF
+- PDF to JPG/PNG
+
+💰 Financial & Business Calculators:
+- Mortgage Calculator
+- Loan Calculator
+- Interest Calculator
+- Savings Calculator
+- Currency Converter
+- Salary/Income Tax Calculator
+- ROI Calculator
+
+🛠️ Everyday Utility Tools:
+- QR Code Generator
+- Password Generator
+- Unit Converter (length, weight, temperature, etc.)
+- Age Calculator
+- BMI Calculator
+- Random Number Generator
+- Text Case Converter (uppercase/lowercase/title case)
+- Word Counter / Character Counter
+- Stopwatch / Timer / Pomodoro Clock
+
+🤖 AI Mini Tools:
+- AI Text Summarizer
+- AI Paraphraser
+- AI Name Generator (business names, usernames)
+- AI Resume Bullet Generator
+- AI Joke Generator
+- AI Story Generator
+
+🧑‍💻 Developer Tools:
+- JSON Formatter
+- Base64 Encoder/Decoder
+- HTML/CSS/JS Minifier
+- Regex Tester
+- Color Picker / HEX ↔ RGB Converter
+
+Requirements:
+1. Each tool should have its own dedicated page with a simple UI (input fields, buttons, output area).
+2. Use plain HTML, CSS, and JavaScript (no backend required).
+3. Ensure all tools run directly in the browser.
+4. Add a navigation bar with categories and dropdowns for tools.
+5. Add a footer with site name, copyright, and placeholder for contact.
+6. Optimize for SEO with meta tags and descriptive titles.
+7. Insert placeholder sections for Google AdSense ads (top banner, sidebar, and bottom).
+8. Keep the code modular and well-commented so tools can be expanded later.
+9. Make sure the site is responsive and works on desktop and mobile.
+
+Deliverables:
+- index.html (homepage with categories and links)
+- style.css (clean, modern design)
+- script.js (logic for tools)
+- Separate HTML/JS files for each tool page
+- Example placeholders for AdSense ad slots
+
+The final result should be a fully functional multi-tool website ready to host as tudoin1.com.
