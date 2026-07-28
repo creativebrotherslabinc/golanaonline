@@ -862,7 +862,7 @@ export function CurrencyCalc() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?from=${base}`);
+      const res = await fetch(`/api/currency/latest?from=${base}`);
       if (!res.ok) throw new Error('Failed to fetch rates');
       const data = await res.json();
       setRates({ ...data.rates, [base]: 1 });
