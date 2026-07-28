@@ -105,13 +105,19 @@ export function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="#pdf" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              PDF Tools
+              📄 PDF Tools
             </Link>
             <Link href="#calc" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              Calculators
+              💰 Calculators
             </Link>
             <Link href="#tools" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              Utilities
+              🛠️ Everyday Utilities
+            </Link>
+            <Link href="#ai" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
+              🤖 AI Mini Tools
+            </Link>
+            <Link href="#dev" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
+              🧑‍💻 Developer Tools
             </Link>
           </div>
         </div>
