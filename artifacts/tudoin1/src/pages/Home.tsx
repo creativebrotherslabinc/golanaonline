@@ -120,24 +120,26 @@ export function Home() {
             Your all-in-one browser utility hub. No installations, no tracking, completely free. Everything you need, all in one place.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="#pdf" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              📄 PDF Tools
-            </Link>
-            <Link href="#media" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              🖼️ Media Tools
-            </Link>
-            <Link href="#calc" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              💰 Calculators
-            </Link>
-            <Link href="#tools" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              🛠️ Everyday Utilities
-            </Link>
-            <Link href="#ai" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              🤖 AI Mini Tools
-            </Link>
-            <Link href="#dev" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
-              🧑‍💻 Developer Tools
-            </Link>
+            {[
+              { href: '#pdf',   label: '📄 PDF Tools' },
+              { href: '#media', label: '🖼️ Media Tools' },
+              { href: '#calc',  label: '💰 Calculators' },
+              { href: '#tools', label: '🛠️ Everyday Utilities' },
+              { href: '#ai',    label: '🤖 AI Mini Tools' },
+              { href: '#dev',   label: '🧑‍💻 Developer Tools' },
+            ].map(({ href, label }) => (
+              <a
+                key={href}
+                href={href}
+                onClick={e => {
+                  e.preventDefault();
+                  document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
+              >
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
