@@ -434,3 +434,72 @@ export function TimerTool() {
     </Shell>
   );
 }
+
+// ── Date Difference Calculator ──────────────────────────────────────────────
+export function DateDiffCalc() {
+  const [d1, setD1] = React.useState('');
+  const [d2, setD2] = React.useState('');
+
+  const diff = React.useMemo(() => {
+    if (!d1 || !d2) return null;
+    const a = new Date(d1), b = new Date(d2);
+    if (isNaN(a.getTime()) || isNaN(b.getTime())) return null;
+    const [from, to] = a <= b ? [a, b] : [b, a];
+    const totalMs = to.getTime() - from.getTime();
+    const totalDays = Math.floor(totalMs / 86400000);
+    const totalWeeks = Math.floor(totalDays / 7);
+    const totalMonths = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+    const totalYears = Math.floor(totalMonths / 12);
+
+    let years = to.getFullYear() - from.getFullYear();
+    let months = to.getMonth() - from.getMonth();
+    let days = to.getDate() - from.getDate();
+    if (days < 0) { months--; days += new Date(to.getFullYear(), to.getMonth(), 0).getDate(); }
+    if (months < 0) { years--; months += 12; }
+    return { years, months, days, totalDays, totalWeeks, totalMonths, totalYears };
+  }, [d1, d2]);
+
+  return (
+    <Shell>
+      <ToolLayout title="Date Difference Calculator" description="Find the exact difference between two dates." category="Everyday Utilities" categoryPath="/#tools">
+        <div className="max-w-lg mx-auto space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Start Date</label>
+              <input type="date" value={d1} onChange={e => setD1(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">End Date</label>
+              <input type="date" value={d2} onChange={e => setD2(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+          </div>
+          {diff && (
+            <div className="space-y-4">
+              <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl text-center">
+                <div className="text-sm text-primary font-medium uppercase tracking-wider mb-3">Exact Difference</div>
+                <div className="text-4xl font-black text-foreground">
+                  {diff.years > 0 && <><span>{diff.years}</span><span className="text-xl font-normal text-muted-foreground"> yr </span></>}
+                  {diff.months > 0 && <><span>{diff.months}</span><span className="text-xl font-normal text-muted-foreground"> mo </span></>}
+                  <span>{diff.days}</span><span className="text-xl font-normal text-muted-foreground"> days</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { l: 'Total Days', v: diff.totalDays.toLocaleString() },
+                  { l: 'Total Weeks', v: diff.totalWeeks.toLocaleString() },
+                  { l: 'Total Months', v: diff.totalMonths.toLocaleString() },
+                  { l: 'Total Years', v: diff.totalYears.toLocaleString() },
+                ].map(s => (
+                  <div key={s.l} className="p-4 border rounded-xl text-center">
+                    <div className="text-2xl font-bold text-primary">{s.v}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </ToolLayout>
+    </Shell>
+  );
+}

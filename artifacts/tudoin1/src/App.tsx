@@ -31,8 +31,17 @@ import {
 
 // Dev Tools
 import { 
-  JsonTool, Base64Tool, MinifierTool, RegexTool, ColorTool 
+  JsonTool, Base64Tool, MinifierTool, RegexTool, ColorTool, TextDiffTool
 } from '@/pages/dev-tools';
+
+// Media Tools
+import {
+  ImageCompressor, ImageConverter, VideoCompressor, VideoToMp3, AudioCutter
+} from '@/pages/media-tools';
+
+// Extra Calc + Utils
+import { PercentageCalc } from '@/pages/calc-tools';
+import { DateDiffCalc } from '@/pages/utils-tools';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } }
@@ -87,6 +96,18 @@ function Router() {
       <Route path="/dev/minifier" component={MinifierTool} />
       <Route path="/dev/regex" component={RegexTool} />
       <Route path="/dev/color" component={ColorTool} />
+      <Route path="/dev/diff" component={TextDiffTool} />
+
+      {/* Media Routes */}
+      <Route path="/media/img-compressor" component={ImageCompressor} />
+      <Route path="/media/img-converter" component={ImageConverter} />
+      <Route path="/media/video-compressor" component={VideoCompressor} />
+      <Route path="/media/video-to-mp3" component={VideoToMp3} />
+      <Route path="/media/audio-cutter" component={AudioCutter} />
+
+      {/* Extra Calc + Utils */}
+      <Route path="/calc/percentage" component={PercentageCalc} />
+      <Route path="/tools/datediff" component={DateDiffCalc} />
 
       <Route component={NotFound} />
     </Switch>

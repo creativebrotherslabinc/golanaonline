@@ -17,6 +17,7 @@ export function Shell({ children }: ShellProps) {
 
   const navGroups = [
     { name: 'PDF Tools', icon: FileText, path: '/pdf/merger' },
+    { name: 'Media', icon: Hammer, path: '/media/img-compressor' },
     { name: 'Calculators', icon: Calculator, path: '/calc/mortgage' },
     { name: 'Utilities', icon: Wrench, path: '/tools/qr' },
     { name: 'AI Mini', icon: Cpu, path: '/ai/summarizer' },

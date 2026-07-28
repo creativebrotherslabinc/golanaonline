@@ -1363,3 +1363,47 @@ export function RoiCalc() {
     </Shell>
   );
 }
+
+// ── Percentage Calculator ───────────────────────────────────────────────────
+export function PercentageCalc() {
+  const [a, setA] = React.useState('');
+  const [b, setB] = React.useState('');
+
+  const pctOf     = a && b ? ((+a / 100) * +b).toFixed(4) : '';
+  const whatPct   = a && b ? ((+a / +b) * 100).toFixed(4) : '';
+  const pctChange = a && b ? (((+b - +a) / +a) * 100).toFixed(4) : '';
+
+  return (
+    <Shell>
+      <ToolLayout title="Percentage Calculator" description="Three common percentage calculations in one place." category="Calculators" categoryPath="/#calc">
+        <div className="max-w-lg mx-auto space-y-8">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Value A</label>
+              <input type="number" value={a} onChange={e => setA(e.target.value)} placeholder="e.g. 25" className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Value B</label>
+              <input type="number" value={b} onChange={e => setB(e.target.value)} placeholder="e.g. 200" className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[
+              { label: 'A% of B', desc: `${a||'A'}% of ${b||'B'}`, value: pctOf },
+              { label: 'A is what % of B', desc: `${a||'A'} is what % of ${b||'B'}`, value: whatPct ? `${whatPct}%` : '' },
+              { label: '% change from A to B', desc: `Change from ${a||'A'} to ${b||'B'}`, value: pctChange ? `${pctChange}%` : '' },
+            ].map(row => (
+              <div key={row.label} className="flex justify-between items-center p-4 border rounded-xl hover:bg-muted/30 transition-colors">
+                <div>
+                  <div className="font-semibold text-sm">{row.label}</div>
+                  <div className="text-xs text-muted-foreground">{row.desc}</div>
+                </div>
+                <div className="text-2xl font-bold text-primary tabular-nums">{row.value || '—'}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ToolLayout>
+    </Shell>
+  );
+}

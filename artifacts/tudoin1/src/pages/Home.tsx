@@ -7,7 +7,8 @@ import {
   Calculator, Receipt, Landmark, PiggyBank, DollarSign, Briefcase, TrendingUp,
   QrCode, Key, Scale, Calendar, Activity, Dices, CaseSensitive, Hash, Timer,
   AlignLeft, Replace, Lightbulb, FileBadge, Smile, BookOpen,
-  Braces, Fingerprint, Scissors, Regex, Palette
+  Braces, Fingerprint, Scissors, Regex, Palette,
+  Image, Video, Music, Diff, Percent, CalendarDays, Film, Mic
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -27,6 +28,18 @@ const CATEGORIES = [
     ]
   },
   {
+    id: 'media',
+    title: '🖼️ Media Tools',
+    description: 'Compress, convert, and edit images, videos, and audio files.',
+    tools: [
+      { name: 'Image Compressor', path: '/media/img-compressor', icon: Image },
+      { name: 'Image Converter', path: '/media/img-converter', icon: Film },
+      { name: 'Video Compressor', path: '/media/video-compressor', icon: Video },
+      { name: 'Video to Audio', path: '/media/video-to-mp3', icon: Music },
+      { name: 'Audio Cutter', path: '/media/audio-cutter', icon: Mic },
+    ]
+  },
+  {
     id: 'calc',
     title: '💰 Calculators',
     description: 'Financial, investment, and everyday mathematical calculators.',
@@ -38,6 +51,7 @@ const CATEGORIES = [
       { name: 'Currency Converter', path: '/calc/currency', icon: DollarSign },
       { name: 'Salary Tax Calc', path: '/calc/salary', icon: Briefcase },
       { name: 'ROI Calculator', path: '/calc/roi', icon: Calculator },
+      { name: 'Percentage Calculator', path: '/calc/percentage', icon: Percent },
     ]
   },
   {
@@ -49,6 +63,7 @@ const CATEGORIES = [
       { name: 'Password Generator', path: '/tools/password', icon: Key },
       { name: 'Unit Converter', path: '/tools/unit', icon: Scale },
       { name: 'Age Calculator', path: '/tools/age', icon: Calendar },
+      { name: 'Date Difference', path: '/tools/datediff', icon: CalendarDays },
       { name: 'BMI Calculator', path: '/tools/bmi', icon: Activity },
       { name: 'Random Number', path: '/tools/random', icon: Dices },
       { name: 'Text Case Converter', path: '/tools/textcase', icon: CaseSensitive },
@@ -79,6 +94,7 @@ const CATEGORIES = [
       { name: 'Code Minifier', path: '/dev/minifier', icon: Scissors },
       { name: 'Regex Tester', path: '/dev/regex', icon: Regex },
       { name: 'Color Picker', path: '/dev/color', icon: Palette },
+      { name: 'Text Diff Checker', path: '/dev/diff', icon: Diff },
     ]
   }
 ];
@@ -106,6 +122,9 @@ export function Home() {
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="#pdf" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
               📄 PDF Tools
+            </Link>
+            <Link href="#media" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
+              🖼️ Media Tools
             </Link>
             <Link href="#calc" className="bg-white hover:bg-gray-50 text-foreground border shadow-sm px-4 py-2 rounded-full text-sm font-medium transition-colors">
               💰 Calculators

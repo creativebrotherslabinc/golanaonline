@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Shell } from '@/components/layout/Shell';
 import { ToolLayout } from '@/components/shared/ToolLayout';
 import { Button } from '@/components/ui/button';
@@ -203,6 +203,67 @@ export function ColorTool() {
                 <Input value={hex.toUpperCase()} readOnly className="font-mono text-lg font-bold" />
                 <Button variant="outline" onClick={() => navigator.clipboard.writeText(hex.toUpperCase())}>Copy</Button>
               </div>
+            </div>
+          </div>
+        </div>
+      </ToolLayout>
+    </Shell>
+  );
+}
+
+// ── Text Diff Checker ───────────────────────────────────────────────────────
+export function TextDiffTool() {
+  const [left, setLeft] = React.useState('The quick brown fox\njumps over the lazy dog\nHello world');
+  const [right, setRight] = React.useState('The quick brown fox\nleaps over the lazy cat\nHello world\nNew line here');
+
+  const diff = useMemo(() => {
+    const a = left.split('\n');
+    const b = right.split('\n');
+    const result: { type: 'same' | 'removed' | 'added'; text: string }[] = [];
+    const maxLen = Math.max(a.length, b.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (a[i] === b[i]) {
+        result.push({ type: 'same', text: a[i] ?? '' });
+      } else {
+        if (a[i] !== undefined) result.push({ type: 'removed', text: a[i] });
+        if (b[i] !== undefined) result.push({ type: 'added', text: b[i] });
+      }
+    }
+    return result;
+  }, [left, right]);
+
+  const added   = diff.filter(l => l.type === 'added').length;
+  const removed = diff.filter(l => l.type === 'removed').length;
+
+  return (
+    <Shell>
+      <ToolLayout title="Text Diff Checker" description="Compare two texts line-by-line and highlight differences." category="Developer Tools" categoryPath="/#dev">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Original Text</label>
+              <textarea value={left} onChange={e => setLeft(e.target.value)} rows={8} className="w-full border rounded-md px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Modified Text</label>
+              <textarea value={right} onChange={e => setRight(e.target.value)} rows={8} className="w-full border rounded-md px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+          </div>
+          <div className="flex gap-4 text-sm">
+            <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 font-medium">− {removed} removed</span>
+            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">+ {added} added</span>
+          </div>
+          <div className="border rounded-xl overflow-hidden font-mono text-sm">
+            <div className="bg-muted px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Diff Result</div>
+            <div className="divide-y max-h-96 overflow-y-auto">
+              {diff.map((line, i) => (
+                <div key={i} className={`flex gap-3 px-4 py-1.5 ${line.type === 'removed' ? 'bg-red-50 text-red-800' : line.type === 'added' ? 'bg-green-50 text-green-800' : 'text-foreground'}`}>
+                  <span className="w-4 shrink-0 text-center opacity-60 select-none">
+                    {line.type === 'removed' ? '−' : line.type === 'added' ? '+' : ' '}
+                  </span>
+                  <span className="break-all whitespace-pre-wrap">{line.text || <span className="opacity-30 italic">empty line</span>}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
