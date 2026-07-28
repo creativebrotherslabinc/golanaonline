@@ -11,7 +11,7 @@ import QRCode from 'qrcode';
 import { useToast } from '@/hooks/use-toast';
 
 export function QrTool() {
-  const [text, setText] = useState('https://tudoin1.com');
+  const [text, setText] = useState('https://golana.online');
   const [qrUrl, setQrUrl] = useState('');
 
   useEffect(() => {

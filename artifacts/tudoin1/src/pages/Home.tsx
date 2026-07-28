@@ -85,7 +85,7 @@ const CATEGORIES = [
 
 export function Home() {
   React.useEffect(() => {
-    document.title = "Tudo em 1 - Free Online Tools | tudoin1.com";
+    document.title = "Go Lana – Free Online Tools | golana.online";
   }, []);
 
   return (
@@ -93,10 +93,13 @@ export function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-primary/10 to-background pt-16 pb-12 md:pt-24 md:pb-20 border-b">
         <div className="container mx-auto px-4 text-center max-w-3xl">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-foreground">
-            Tudo em 1 <br/>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-foreground">
+            Go Lana <br/>
             <span className="text-primary text-3xl md:text-5xl mt-2 block">Free Online Tools</span>
           </h1>
+          <p className="text-sm font-semibold tracking-widest text-primary/70 uppercase mb-4">
+            <span className="text-primary">L</span>ibrary of <span className="text-primary">A</span>ll <span className="text-primary">N</span>eeded <span className="text-primary">A</span>pps
+          </p>
           <p className="text-lg md:text-xl text-muted-foreground mb-8">
             Your all-in-one browser utility hub. No installations, no tracking, completely free. Everything you need, all in one place.
           </p>

@@ -33,7 +33,7 @@ export function Shell({ children }: ShellProps) {
                 <Hammer className="w-5 h-5" />
               </div>
               <span className="text-xl font-bold tracking-tight">
-                tudoin1<span className="text-primary">.com</span>
+                Go Lana<span className="text-primary">.online</span>
               </span>
             </Link>
           </div>
@@ -88,10 +88,10 @@ export function Shell({ children }: ShellProps) {
         <div className="container mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 opacity-80">
             <Hammer className="w-5 h-5 text-primary" />
-            <span className="font-bold tracking-tight text-lg">tudoin1.com</span>
+            <span className="font-bold tracking-tight text-lg">golana.online</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} tudoin1.com | All-in-One Free Tools
+            © {new Date().getFullYear()} golana.online | Library of All Needed Apps
           </p>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-foreground">Terms</Link>

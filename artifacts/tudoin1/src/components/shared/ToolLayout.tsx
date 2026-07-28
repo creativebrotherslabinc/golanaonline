@@ -13,7 +13,7 @@ interface ToolLayoutProps {
 
 export function ToolLayout({ title, description, category, categoryPath, children }: ToolLayoutProps) {
   useEffect(() => {
-    document.title = `${title} - tudoin1.com`;
+    document.title = `${title} - golana.online`;
   }, [title]);
 
   return (
