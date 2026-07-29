@@ -862,7 +862,13 @@ export function CurrencyCalc() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/currency/latest?from=${base}`);
+      // In dev (Replit preview) use the local proxy to avoid iframe CORS issues.
+      // In production (GitHub Pages, golana.online, etc.) call Frankfurter directly
+      // — it returns Access-Control-Allow-Origin: * so no proxy is needed.
+      const url = import.meta.env.DEV
+        ? `/api/currency/latest?from=${base}`
+        : `https://api.frankfurter.dev/v1/latest?from=${base}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch rates');
       const data = await res.json();
       setRates({ ...data.rates, [base]: 1 });
