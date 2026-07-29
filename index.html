@@ -23,5 +23,32 @@
   </head>
   <body>
     <div id="root"></div>
+  <script>
+    (function() {
+      function replaceLogo() {
+        var svg = document.querySelector('header a svg.w-5, header a svg[class*="w-5"]');
+        if (svg) {
+          var parent = svg.parentElement;
+          var img = document.createElement('img');
+          img.src = '/favicon.png';
+          img.style.width = '20px';
+          img.style.height = '20px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '2px';
+          parent.replaceChild(img, svg);
+          return true;
+        }
+        return false;
+      }
+      if (!replaceLogo()) {
+        var observer = new MutationObserver(function() {
+          if (replaceLogo()) observer.disconnect();
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+          observer.observe(document.body, { childList: true, subtree: true });
+        });
+      }
+    })();
+  </script>
   </body>
 </html>
