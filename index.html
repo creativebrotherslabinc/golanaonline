@@ -20,11 +20,33 @@
      crossorigin="anonymous"></script>
     <script type="module" crossorigin src="/assets/index-MJ358mDA-v2.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CupsWWkV.css">
+    <style>
+      /* Collapse ad slots that are unfilled or errored */
+      ins.adsbygoogle[data-ad-status="unfilled"],
+      ins.adsbygoogle[data-ad-status="error"] {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+      }
+      /* Collapse the min-h wrapper div around the ins */
+      div:has(> ins.adsbygoogle[data-ad-status="unfilled"]),
+      div:has(> ins.adsbygoogle[data-ad-status="error"]) {
+        min-height: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+      /* Collapse the outer mb-8 / mb-12 wrapper */
+      div:has(> div > ins.adsbygoogle[data-ad-status="unfilled"]),
+      div:has(> div > ins.adsbygoogle[data-ad-status="error"]) {
+        margin-bottom: 0 !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
   <script>
     (function() {
+      // ── Logo replacement ──────────────────────────────────────────
       function replaceLogo() {
         var svg = document.querySelector('header a svg.w-5, header a svg[class*="w-5"]');
         if (svg) {
@@ -41,13 +63,66 @@
         return false;
       }
       if (!replaceLogo()) {
-        var observer = new MutationObserver(function() {
-          if (replaceLogo()) observer.disconnect();
+        var logoObserver = new MutationObserver(function() {
+          if (replaceLogo()) logoObserver.disconnect();
         });
         document.addEventListener('DOMContentLoaded', function() {
-          observer.observe(document.body, { childList: true, subtree: true });
+          logoObserver.observe(document.body, { childList: true, subtree: true });
         });
       }
+
+      // ── /games redirect → /#games ────────────────────────────────
+      if (window.location.pathname === '/games') {
+        window.history.replaceState(null, '', '/');
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(function() {
+            var el = document.getElementById('games');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        });
+      }
+
+      // ── Scroll to top on every SPA navigation ────────────────────
+      (function() {
+        var orig = history.pushState;
+        history.pushState = function() {
+          orig.apply(this, arguments);
+          window.scrollTo(0, 0);
+        };
+        window.addEventListener('popstate', function() {
+          window.scrollTo(0, 0);
+        });
+      })();
+
+      // ── Collapse empty / failed ad slots ─────────────────────────
+      function collapseEmptyAds() {
+        document.querySelectorAll('ins.adsbygoogle').forEach(function(ins) {
+          var status = ins.getAttribute('data-ad-status');
+          if (status !== 'filled') {
+            ins.style.cssText += ';display:none!important;height:0!important;min-height:0!important;';
+            // Collapse the min-h wrapper (direct parent)
+            var p1 = ins.parentElement;
+            if (p1) {
+              p1.style.cssText += ';min-height:0!important;height:0!important;overflow:hidden!important;';
+              // Collapse the mb-8 / mb-12 outer wrapper
+              var p2 = p1.parentElement;
+              if (p2 && !p2.id && p2 !== document.body) {
+                p2.style.cssText += ';margin-bottom:0!important;padding-bottom:0!important;';
+              }
+            }
+          }
+        });
+      }
+      // Run after ads have had a chance to load (1.5 s), then again later
+      setTimeout(collapseEmptyAds, 1500);
+      setTimeout(collapseEmptyAds, 4000);
+      // Also watch for ads injected by React after navigation
+      document.addEventListener('DOMContentLoaded', function() {
+        var adObserver = new MutationObserver(function() {
+          setTimeout(collapseEmptyAds, 1500);
+        });
+        adObserver.observe(document.body, { childList: true, subtree: true });
+      });
     })();
   </script>
   </body>
