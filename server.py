@@ -2,11 +2,18 @@
 """Simple SPA-aware static file server.
 Serves real files normally; falls back to index.html for any path
 that doesn't match a file on disk (so React Router handles routing).
+Sends no-cache headers so browsers always fetch the latest files.
 """
 import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 class SPAHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_GET(self):
         # Strip query string for file lookup
         path = self.path.split("?")[0].split("#")[0]
