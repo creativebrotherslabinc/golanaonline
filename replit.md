@@ -10,10 +10,10 @@ A pre-built React SPA for [golana.online](https://golana.online) — a browser-b
 ## Running the project
 
 ```bash
-python3 -m http.server 5000
+python3 server.py
 ```
 
-The workflow **Start application** is configured to run this automatically. The app is served at port 5000.
+The workflow **Start application** is configured to run this automatically. The app is served at port 5000. `server.py` is a small SPA-aware wrapper around Python's built-in HTTP server — it falls back to `index.html` for any URL that isn't a real file, so React Router handles client-side routing correctly.
 
 ## Project structure
 
