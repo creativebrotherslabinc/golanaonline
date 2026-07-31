@@ -102,6 +102,57 @@
         });
       })();
 
+      // ── Inject missing nav links into the Go LANA header ─────────
+      // The React header only renders 6 links; Time & Planning, Games, Apps are absent.
+      (function() {
+        function injectNavLinks() {
+          var nav = document.querySelector('header nav');
+          if (!nav) return false;
+          if (document.getElementById('__nav-injected')) return true;
+
+          // Clone the last existing link to inherit all classes/styles
+          var existing = nav.querySelectorAll('a');
+          if (!existing.length) return false;
+          var template = existing[existing.length - 1];
+
+          var toAdd = [
+            { label: '🕐 Time & Planning', href: '/time/worldclock' },
+            { label: '🎮 Games',           href: '/games/ttt'       },
+            { label: '📱 Apps',            href: '/#apps'           },
+          ];
+
+          toAdd.forEach(function(item) {
+            var link = template.cloneNode(true);
+            link.setAttribute('href', item.href);
+            // Clear children and set plain text
+            while (link.firstChild) link.removeChild(link.firstChild);
+            link.appendChild(document.createTextNode(item.label));
+            // For Apps use anchor scroll, not React Router navigation
+            if (item.href.startsWith('/#')) {
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = item.href.slice(2);
+                var sec = document.getElementById(id);
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+                else window.location.href = item.href;
+              });
+            }
+            nav.appendChild(link);
+          });
+
+          var m = document.createElement('meta');
+          m.id = '__nav-injected';
+          document.head.appendChild(m);
+          return true;
+        }
+
+        var obs = new MutationObserver(function() { if (injectNavLinks()) obs.disconnect(); });
+        document.addEventListener('DOMContentLoaded', function() {
+          obs.observe(document.body, { childList: true, subtree: true });
+          setTimeout(function() { injectNavLinks(); obs.disconnect(); }, 3000);
+        });
+      })();
+
       // ── Apps category + FindingMyFood injection ──────────────────
       (function() {
         function inject() {
