@@ -25,6 +25,109 @@ body {
   color: var(--dark);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  padding-top: 57px; /* clearance for the fixed Go LANA top bar */
+}
+
+/* ─── Go LANA Top Bar ─────────────────────────── */
+.golana-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 57px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.golana-topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.golana-topbar-logo img {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.golana-topbar-logo-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.golana-topbar-logo-text span {
+  color: #2563eb;
+}
+
+.golana-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.golana-topbar-nav a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.golana-topbar-nav a:hover { color: #0f172a; }
+
+@media (max-width: 640px) {
+  .golana-topbar-nav { display: none; }
+}
+
+/* ─── Scroll-to-top button ───────────────────── */
+.golana-scroll-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s, transform 0.25s, box-shadow 0.15s;
+  pointer-events: none;
+}
+
+.golana-scroll-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.golana-scroll-top:hover {
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+  transform: scale(1.08);
+}
+
+.golana-scroll-top svg {
+  width: 20px;
+  height: 20px;
 }
 
 .hidden { display: none !important; }

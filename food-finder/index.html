@@ -19,6 +19,30 @@
   </head>
   <body>
 
+    <!-- Go LANA Top Bar -->
+    <header class="golana-topbar">
+      <a href="/" class="golana-topbar-logo">
+        <img src="/favicon.png" alt="Go LANA logo" />
+        <span class="golana-topbar-logo-text">Go LANA<span>.online</span></span>
+      </a>
+      <nav class="golana-topbar-nav">
+        <a href="/#pdf">📄 PDF Tools</a>
+        <a href="/#media">🖼️ Media</a>
+        <a href="/#calc">💰 Calculators</a>
+        <a href="/#tools">🛠️ Utilities</a>
+        <a href="/#ai">🤖 AI Mini</a>
+        <a href="/#dev">&lt;/&gt; Dev Tools</a>
+        <a href="/#apps">📱 Apps</a>
+      </nav>
+    </header>
+
+    <!-- Scroll-to-top button -->
+    <button class="golana-scroll-top" id="scroll-top-btn" aria-label="Back to top">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"/>
+      </svg>
+    </button>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay hidden">
       <div class="loading-content">
@@ -255,5 +279,18 @@
     </div>
 
     <script src="./script.js"></script>
+    <script>
+      // Scroll-to-top button visibility
+      (function () {
+        var btn = document.getElementById('scroll-top-btn');
+        window.addEventListener('scroll', function () {
+          if (window.scrollY > 300) btn.classList.add('visible');
+          else btn.classList.remove('visible');
+        }, { passive: true });
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
+    </script>
   </body>
 </html>
