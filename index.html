@@ -102,43 +102,97 @@
         });
       })();
 
-      // ── Inject missing nav links into the Go LANA header ─────────
-      // The React header only renders 6 links; Time & Planning, Games, Apps are absent.
+      // ── Replace header nav with hamburger dropdown ────────────────
       (function() {
-        function injectNavLinks() {
-          var nav = document.querySelector('header nav');
-          if (!nav) return false;
+        var CATEGORIES = [
+          { label: '📄 PDF Tools',          href: '/pdf/merger'         },
+          { label: '🖼️ Media',              href: '/media/img-compressor'},
+          { label: '💰 Calculators',         href: '/calc/mortgage'      },
+          { label: '🛠️ Everyday Utilities',  href: '/tools/qr'           },
+          { label: '🤖 AI Mini Tools',       href: '/ai/summarizer'      },
+          { label: '</> Developer Tools',    href: '/dev/diff'           },
+          { label: '🕐 Time & Planning',     href: '/time/worldclock'    },
+          { label: '🎮 Games',               href: '/games/ttt'          },
+          { label: '📱 Apps',                href: '/#apps', isAnchor: true },
+        ];
+
+        var STYLES = [
+          '.golana-hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;background:none;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0}',
+          '.golana-hamburger:hover{background:#f1f5f9;border-color:#cbd5e1}',
+          '.golana-hamburger span{display:block;height:2px;background:#475569;border-radius:2px}',
+          '.golana-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;z-index:9999;animation:gdIn .15s ease}',
+          '.golana-dropdown.open{display:block}',
+          '@keyframes gdIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}',
+          '.golana-dropdown a{display:block;padding:11px 18px;font-size:.875rem;font-weight:500;color:#334155;text-decoration:none;transition:background .1s,color .1s;border-bottom:1px solid #f1f5f9}',
+          '.golana-dropdown a:last-child{border-bottom:none}',
+          '.golana-dropdown a:hover{background:#f8fafc;color:#2563eb}',
+          '.golana-wrap{position:relative;margin-left:auto}',
+        ].join('');
+
+        function injectHamburger() {
           if (document.getElementById('__nav-injected')) return true;
+          var header = document.querySelector('header');
+          if (!header) return false;
+          var reactNav = header.querySelector('nav');
+          if (!reactNav) return false;
 
-          // Clone the last existing link to inherit all classes/styles
-          var existing = nav.querySelectorAll('a');
-          if (!existing.length) return false;
-          var template = existing[existing.length - 1];
+          // Inject stylesheet
+          var style = document.createElement('style');
+          style.textContent = STYLES;
+          document.head.appendChild(style);
 
-          var toAdd = [
-            { label: '🕐 Time & Planning', href: '/time/worldclock' },
-            { label: '🎮 Games',           href: '/games/ttt'       },
-            { label: '📱 Apps',            href: '/#apps'           },
-          ];
+          // Find the inner flex container (has h-16 and flex items-center)
+          var innerContainer = header.querySelector('div[class*="h-16"]') || header;
 
-          toAdd.forEach(function(item) {
-            var link = template.cloneNode(true);
-            link.setAttribute('href', item.href);
-            // Clear children and set plain text
-            while (link.firstChild) link.removeChild(link.firstChild);
-            link.appendChild(document.createTextNode(item.label));
-            // For Apps use anchor scroll, not React Router navigation
-            if (item.href.startsWith('/#')) {
-              link.addEventListener('click', function(e) {
+          // Hide React nav
+          reactNav.style.display = 'none';
+
+          // Build wrapper → button + dropdown
+          var wrap = document.createElement('div');
+          wrap.className = 'golana-wrap';
+
+          var btn = document.createElement('button');
+          btn.className = 'golana-hamburger';
+          btn.setAttribute('aria-label', 'Open menu');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.innerHTML = '<span></span><span></span><span></span>';
+
+          var dd = document.createElement('div');
+          dd.className = 'golana-dropdown';
+          dd.setAttribute('aria-hidden', 'true');
+
+          CATEGORIES.forEach(function(item) {
+            var a = document.createElement('a');
+            a.textContent = item.label;
+            if (item.isAnchor) {
+              a.href = '#';
+              a.addEventListener('click', function(e) {
                 e.preventDefault();
-                var id = item.href.slice(2);
-                var sec = document.getElementById(id);
+                dd.classList.remove('open');
+                var sec = document.getElementById('apps');
                 if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-                else window.location.href = item.href;
               });
+            } else {
+              a.href = item.href;
             }
-            nav.appendChild(link);
+            dd.appendChild(a);
           });
+
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var open = dd.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open);
+            dd.setAttribute('aria-hidden', !open);
+          });
+
+          document.addEventListener('click', function() {
+            dd.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+          });
+
+          wrap.appendChild(btn);
+          wrap.appendChild(dd);
+          innerContainer.appendChild(wrap);
 
           var m = document.createElement('meta');
           m.id = '__nav-injected';
@@ -146,10 +200,10 @@
           return true;
         }
 
-        var obs = new MutationObserver(function() { if (injectNavLinks()) obs.disconnect(); });
+        var obs = new MutationObserver(function() { if (injectHamburger()) obs.disconnect(); });
         document.addEventListener('DOMContentLoaded', function() {
           obs.observe(document.body, { childList: true, subtree: true });
-          setTimeout(function() { injectNavLinks(); obs.disconnect(); }, 3000);
+          setTimeout(function() { injectHamburger(); obs.disconnect(); }, 3000);
         });
       })();
 

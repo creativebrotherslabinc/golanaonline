@@ -70,26 +70,75 @@ body {
   color: #2563eb;
 }
 
-.golana-topbar-nav {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+.golana-topbar-right {
+  position: relative;
 }
 
-.golana-topbar-nav a {
+/* ── Hamburger button ── */
+.golana-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.golana-hamburger:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.golana-hamburger span {
+  display: block;
+  height: 2px;
+  background: #475569;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+/* ── Dropdown panel ── */
+.golana-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropdownIn 0.15s ease;
+}
+
+.golana-dropdown.open { display: block; }
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.golana-dropdown a {
+  display: block;
+  padding: 11px 18px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: #334155;
   text-decoration: none;
-  transition: color 0.15s;
-  white-space: nowrap;
+  transition: background 0.1s, color 0.1s;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.golana-topbar-nav a:hover { color: #0f172a; }
-
-@media (max-width: 640px) {
-  .golana-topbar-nav { display: none; }
-}
+.golana-dropdown a:last-child { border-bottom: none; }
+.golana-dropdown a:hover { background: #f8fafc; color: #2563eb; }
 
 /* ─── Scroll-to-top button ───────────────────── */
 .golana-scroll-top {

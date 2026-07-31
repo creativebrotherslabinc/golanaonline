@@ -25,17 +25,22 @@
         <img src="/favicon.png" alt="Go LANA logo" />
         <span class="golana-topbar-logo-text">Go LANA<span>.online</span></span>
       </a>
-      <nav class="golana-topbar-nav">
-        <a href="/#pdf">📄 PDF Tools</a>
-        <a href="/#media">🖼️ Media</a>
-        <a href="/#calc">💰 Calculators</a>
-        <a href="/#tools">🛠️ Utilities</a>
-        <a href="/#ai">🤖 AI Mini</a>
-        <a href="/#dev">&lt;/&gt; Dev Tools</a>
-        <a href="/#time">🕐 Time &amp; Planning</a>
-        <a href="/#games">🎮 Games</a>
-        <a href="/#apps">📱 Apps</a>
-      </nav>
+      <div class="golana-topbar-right">
+        <button class="golana-hamburger" id="golana-hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="golana-dropdown" id="golana-dropdown" aria-hidden="true">
+          <a href="/#pdf">📄 PDF Tools</a>
+          <a href="/#media">🖼️ Media</a>
+          <a href="/#calc">💰 Calculators</a>
+          <a href="/#tools">🛠️ Everyday Utilities</a>
+          <a href="/#ai">🤖 AI Mini Tools</a>
+          <a href="/#dev">&lt;/&gt; Developer Tools</a>
+          <a href="/#time">🕐 Time &amp; Planning</a>
+          <a href="/#games">🎮 Games</a>
+          <a href="/#apps">📱 Apps</a>
+        </div>
+      </div>
     </header>
 
     <!-- Scroll-to-top button -->
@@ -282,15 +287,42 @@
 
     <script src="./script.js"></script>
     <script>
-      // Scroll-to-top button visibility
+      // Scroll-to-top
       (function () {
         var btn = document.getElementById('scroll-top-btn');
         window.addEventListener('scroll', function () {
-          if (window.scrollY > 300) btn.classList.add('visible');
-          else btn.classList.remove('visible');
+          btn.classList.toggle('visible', window.scrollY > 300);
         }, { passive: true });
         btn.addEventListener('click', function () {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
+
+      // Hamburger dropdown
+      (function () {
+        var hamburger = document.getElementById('golana-hamburger');
+        var dropdown  = document.getElementById('golana-dropdown');
+
+        hamburger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var open = dropdown.classList.toggle('open');
+          hamburger.setAttribute('aria-expanded', open);
+          dropdown.setAttribute('aria-hidden', !open);
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function () {
+          dropdown.classList.remove('open');
+          hamburger.setAttribute('aria-expanded', 'false');
+          dropdown.setAttribute('aria-hidden', 'true');
+        });
+
+        // Close after nav link click
+        dropdown.querySelectorAll('a').forEach(function (a) {
+          a.addEventListener('click', function () {
+            dropdown.classList.remove('open');
+            hamburger.setAttribute('aria-expanded', 'false');
+          });
         });
       })();
     </script>
