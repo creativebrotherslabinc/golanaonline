@@ -102,6 +102,119 @@
         });
       })();
 
+      // ── Apps category + Food Finder injection ────────────────────
+      (function() {
+        if (document.getElementById('__apps-injected')) return;
+
+        function inject() {
+          // Guard: only run once
+          if (document.getElementById('__apps-injected')) return true;
+
+          // 1. Find the Games nav anchor (href="#games") — clone it for the Apps button
+          var gamesBtn = document.querySelector('a[href="#games"]');
+          if (!gamesBtn) return false;
+
+          // 2. Find the Games section (id="games") — clone its structure for the Apps section
+          var gamesSection = document.getElementById('games');
+          if (!gamesSection) return false;
+
+          // ── Inject the Apps nav button ──────────────────────────
+          var appsBtn = gamesBtn.cloneNode(true);
+          appsBtn.setAttribute('href', '#apps');
+          // Replace every text node that says "Games" → "Apps"
+          appsBtn.innerHTML = appsBtn.innerHTML.replace(/Games/g, 'Apps').replace(/🎮/g, '📱');
+          appsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var sec = document.getElementById('apps');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+          });
+          gamesBtn.parentNode.insertBefore(appsBtn, gamesBtn.nextSibling);
+
+          // ── Clone the Games section shell ───────────────────────
+          var appsSection = gamesSection.cloneNode(true);
+          appsSection.id = 'apps';
+
+          // Update title text (first heading inside)
+          var heading = appsSection.querySelector('h2, h3, [class*="title"], [class*="heading"]');
+          if (heading) {
+            heading.innerHTML = heading.innerHTML.replace(/🎮/g, '📱').replace(/Games/g, 'Apps');
+          }
+          // Update description text (first <p>)
+          var desc = appsSection.querySelector('p');
+          if (desc) {
+            desc.textContent = 'Full interactive apps built to run right in your browser.';
+          }
+
+          // ── Build a Food Finder card matching existing tool cards ──
+          // Find a real tool card anchor inside the cloned section to clone its structure
+          var existingCard = appsSection.querySelector('a[href]');
+          var foodCard;
+          if (existingCard) {
+            foodCard = existingCard.cloneNode(true);
+            // Point it to the food-finder page (full navigation, not React Router)
+            foodCard.setAttribute('href', '/food-finder/');
+            foodCard.removeAttribute('data-discover');
+            // Update icon — find SVG or img child and replace with emoji span
+            var iconEl = foodCard.querySelector('svg, img');
+            if (iconEl) {
+              var emojiSpan = document.createElement('span');
+              emojiSpan.textContent = '🍽️';
+              emojiSpan.setAttribute('aria-hidden', 'true');
+              // Copy classes from the icon element so sizing matches
+              emojiSpan.className = iconEl.className;
+              emojiSpan.style.fontSize = '1.25rem';
+              iconEl.parentNode.replaceChild(emojiSpan, iconEl);
+            }
+            // Update the card label text
+            var label = foodCard.querySelector('span:not([aria-hidden]), p, div:last-child');
+            // Walk all text nodes to find the tool name slot
+            var textNodes = [];
+            (function walk(n) {
+              if (n.nodeType === 3 && n.textContent.trim()) { textNodes.push(n); }
+              else { for (var c = n.firstChild; c; c = c.nextSibling) walk(c); }
+            })(foodCard);
+            if (textNodes.length > 0) {
+              textNodes[0].textContent = 'Restaurant Roulette';
+            }
+          } else {
+            // Fallback: build a minimal card from scratch
+            foodCard = document.createElement('a');
+            foodCard.href = '/food-finder/';
+            foodCard.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:box-shadow .15s;font-family:Inter,sans-serif;';
+            foodCard.innerHTML = '<span style="font-size:1.5rem">🍽️</span><span style="font-size:.85rem;font-weight:600;text-align:center">Restaurant Roulette</span>';
+          }
+
+          // Clear all child cards from the cloned section's grid and insert only ours
+          var grid = appsSection.querySelector('[class*="grid"]');
+          if (grid) {
+            grid.innerHTML = '';
+            grid.appendChild(foodCard);
+          } else {
+            // Fallback: replace content after heading+desc
+            appsSection.innerHTML = '';
+            if (heading) appsSection.appendChild(heading);
+            if (desc) appsSection.appendChild(desc);
+            appsSection.appendChild(foodCard);
+          }
+
+          // Insert the Apps section after Games
+          gamesSection.parentNode.insertBefore(appsSection, gamesSection.nextSibling);
+
+          // Mark injected
+          var marker = document.createElement('meta');
+          marker.id = '__apps-injected';
+          document.head.appendChild(marker);
+          return true;
+        }
+
+        // Wait for React to render, then inject
+        var obs = new MutationObserver(function() { if (inject()) obs.disconnect(); });
+        document.addEventListener('DOMContentLoaded', function() {
+          obs.observe(document.body, { childList: true, subtree: true });
+          setTimeout(function() { inject(); obs.disconnect(); }, 3000);
+        });
+      })();
+
       // ── Collapse empty / failed ad slots ─────────────────────────
       // CSS already handles data-ad-status="unfilled/error" cases.
       // This JS handles the case where adsbygoogle.js never runs at all

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- charset MUST be first — browser needs this before parsing anything else -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>FindingMyFood — Spin the Wheel, Find Your Next Meal</title>
+    <meta name="description" content="Randomly discover your next restaurant based on your preferences. Spin the roulette and find your next meal!" />
+    <meta property="og:title" content="FindingMyFood" />
+    <meta property="og:description" content="Spin the roulette. Find your next meal." />
+    <meta property="og:type" content="website" />
+    <!-- Google AdSense — placed after charset so page is correctly parsed -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4925725824431985"
+       crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p id="loading-text">Finding restaurants near you…</p>
+      </div>
+    </div>
+
+    <!-- PAGE 1: SEARCH -->
+    <div id="page-search" class="page">
+      <header class="header">
+        <div class="logo">
+          <span class="logo-icon">🍽️</span>
+          <span class="logo-text">FindingMyFood</span>
+        </div>
+        <p class="tagline">Spin the wheel. Find your next meal.</p>
+      </header>
+
+      <main class="search-form">
+
+        <!-- Location -->
+        <section class="card">
+          <h2 class="card-title">📍 Your Location</h2>
+          <div id="location-auto" class="location-status">
+            <div class="location-detecting">
+              <div class="mini-spinner"></div>
+              <span>Detecting your location…</span>
+            </div>
+          </div>
+          <div id="location-manual" class="location-manual hidden">
+            <p class="location-denied-msg">Location access denied. Enter your city or postal code:</p>
+            <div class="input-row">
+              <input type="text" id="manual-location" class="text-input" placeholder="e.g. New York, NY or 10001" />
+              <button id="btn-geocode" class="btn-secondary">Search</button>
+            </div>
+            <p id="geocode-error" class="field-error hidden">Could not find that location. Try a different city or postal code.</p>
+          </div>
+          <div id="location-confirmed" class="location-confirmed hidden">
+            <span class="location-icon">✅</span>
+            <span id="location-display"></span>
+            <button id="btn-change-location" class="btn-link">Change</button>
+          </div>
+        </section>
+
+        <!-- Search Distance -->
+        <section class="card">
+          <h2 class="card-title">📏 Search Distance</h2>
+          <div class="option-grid radius-grid">
+            <button class="option-btn" data-group="radius" data-value="500">500 m</button>
+            <button class="option-btn" data-group="radius" data-value="1000">1 km</button>
+            <button class="option-btn" data-group="radius" data-value="2000">2 km</button>
+            <button class="option-btn selected" data-group="radius" data-value="5000">5 km</button>
+            <button class="option-btn" data-group="radius" data-value="10000">10 km</button>
+            <button class="option-btn" data-group="radius" data-value="20000">20 km</button>
+          </div>
+        </section>
+
+        <!-- Price Range — multi-select -->
+        <section class="card">
+          <h2 class="card-title">💰 Price Range</h2>
+          <p class="card-hint">Pick one or more — or leave empty for any price</p>
+          <div class="option-grid price-grid">
+            <button class="option-btn" data-group="prices" data-value="1">$</button>
+            <button class="option-btn" data-group="prices" data-value="2">$$</button>
+            <button class="option-btn" data-group="prices" data-value="3">$$$</button>
+            <button class="option-btn" data-group="prices" data-value="4">$$$$</button>
+          </div>
+        </section>
+
+        <!-- Dining Style — multi-select -->
+        <section class="card">
+          <h2 class="card-title">🪑 Dining Style</h2>
+          <p class="card-hint">Pick one or more — or leave empty for any style</p>
+          <div class="option-grid two-col">
+            <button class="option-btn" data-group="dinings" data-value="dine-in">🍽️ Dine-in</button>
+            <button class="option-btn" data-group="dinings" data-value="takeout">🥡 Takeout</button>
+          </div>
+        </section>
+
+        <!-- Extra Filters — toggles only -->
+        <section class="card">
+          <h2 class="card-title">✨ Extra Filters</h2>
+          <div class="toggles-grid">
+            <button id="btn-open-now" class="feature-toggle" aria-pressed="false">
+              <span class="toggle-dot"></span>🕐 Open right now
+            </button>
+            <button id="btn-kids" class="feature-toggle" aria-pressed="false">
+              <span class="toggle-dot"></span>🧒 Kids friendly
+            </button>
+            <button id="btn-pub" class="feature-toggle" aria-pressed="false">
+              <span class="toggle-dot"></span>🍺 Pub / Bar
+            </button>
+            <button id="btn-brewery" class="feature-toggle" aria-pressed="false">
+              <span class="toggle-dot"></span>🍻 Brewery
+            </button>
+          </div>
+        </section>
+
+        <!-- Group Size — multi-select -->
+        <section class="card">
+          <h2 class="card-title">👥 Group Size</h2>
+          <p class="card-hint">Pick one or more — or leave empty for any size</p>
+          <div class="option-grid two-col">
+            <button class="option-btn" data-group="groups" data-value="solo">🧍 Solo</button>
+            <button class="option-btn" data-group="groups" data-value="couple">👫 Couple</button>
+            <button class="option-btn" data-group="groups" data-value="family">👨‍👩‍👧 Family</button>
+            <button class="option-btn" data-group="groups" data-value="group">🎉 Group</button>
+          </div>
+        </section>
+
+        <!-- Minimum Rating — single-select threshold -->
+        <section class="card">
+          <h2 class="card-title">⭐ Minimum Rating</h2>
+          <p class="card-note">Based on community ratings in OpenStreetMap · <em>Google ratings need a paid API key</em></p>
+          <div class="option-grid rating-grid">
+            <button class="option-btn selected" data-group="minRating" data-value="0">Any</button>
+            <button class="option-btn" data-group="minRating" data-value="3">3+ ★</button>
+            <button class="option-btn" data-group="minRating" data-value="3.5">3.5+ ★</button>
+            <button class="option-btn" data-group="minRating" data-value="4">4+ ★</button>
+            <button class="option-btn" data-group="minRating" data-value="4.5">4.5+ ★</button>
+          </div>
+        </section>
+
+        <!-- Wheel Size — how many restaurants on the wheel -->
+        <section class="card">
+          <h2 class="card-title">🎡 Options on Wheel</h2>
+          <p class="card-hint">How many restaurants to spin between</p>
+          <div class="option-grid wheel-grid">
+            <button class="option-btn" data-group="wheelSize" data-value="3">3</button>
+            <button class="option-btn" data-group="wheelSize" data-value="5">5</button>
+            <button class="option-btn" data-group="wheelSize" data-value="8">8</button>
+            <button class="option-btn selected" data-group="wheelSize" data-value="10">10</button>
+            <button class="option-btn" data-group="wheelSize" data-value="15">15</button>
+          </div>
+        </section>
+
+        <!-- Cuisine — last filter; options dim based on all other selections above -->
+        <section class="card">
+          <h2 class="card-title">🍜 Cuisine <span id="pool-status" class="pool-status"></span></h2>
+          <p class="card-hint">Options narrow based on your other filters — or leave on Any</p>
+          <div class="option-grid cuisine-grid">
+            <button class="option-btn selected" data-group="cuisines" data-value="any">Any</button>
+            <button class="option-btn" data-group="cuisines" data-value="italian">Italian</button>
+            <button class="option-btn" data-group="cuisines" data-value="japanese">Japanese</button>
+            <button class="option-btn" data-group="cuisines" data-value="chinese">Chinese</button>
+            <button class="option-btn" data-group="cuisines" data-value="indian">Indian</button>
+            <button class="option-btn" data-group="cuisines" data-value="mexican">Mexican</button>
+            <button class="option-btn" data-group="cuisines" data-value="thai">Thai</button>
+            <button class="option-btn" data-group="cuisines" data-value="american">American</button>
+            <button class="option-btn" data-group="cuisines" data-value="french">French</button>
+            <button class="option-btn" data-group="cuisines" data-value="greek">Greek</button>
+            <button class="option-btn" data-group="cuisines" data-value="spanish">Spanish</button>
+            <button class="option-btn" data-group="cuisines" data-value="turkish">Turkish</button>
+            <button class="option-btn" data-group="cuisines" data-value="lebanese">Lebanese</button>
+            <button class="option-btn" data-group="cuisines" data-value="bbq">BBQ</button>
+            <button class="option-btn" data-group="cuisines" data-value="mediterranean">Mediterranean</button>
+            <button class="option-btn" data-group="cuisines" data-value="korean">Korean</button>
+            <button class="option-btn" data-group="cuisines" data-value="vietnamese">Vietnamese</button>
+            <button class="option-btn" data-group="cuisines" data-value="filipino">Filipino</button>
+            <button class="option-btn" data-group="cuisines" data-value="caribbean">Caribbean</button>
+            <button class="option-btn" data-group="cuisines" data-value="ethiopian">Ethiopian</button>
+            <button class="option-btn" data-group="cuisines" data-value="peruvian">Peruvian</button>
+            <button class="option-btn" data-group="cuisines" data-value="burger">Burgers</button>
+            <button class="option-btn" data-group="cuisines" data-value="pizza">Pizza</button>
+            <button class="option-btn" data-group="cuisines" data-value="sushi">Sushi</button>
+            <button class="option-btn" data-group="cuisines" data-value="ramen">Ramen</button>
+            <button class="option-btn" data-group="cuisines" data-value="dimsum">Dim Sum</button>
+            <button class="option-btn" data-group="cuisines" data-value="steak">Steakhouse</button>
+            <button class="option-btn" data-group="cuisines" data-value="seafood">Seafood</button>
+            <button class="option-btn" data-group="cuisines" data-value="wings">Chicken &amp; Wings</button>
+            <button class="option-btn" data-group="cuisines" data-value="breakfast">Breakfast</button>
+            <button class="option-btn" data-group="cuisines" data-value="sandwich">Sandwich &amp; Deli</button>
+            <button class="option-btn" data-group="cuisines" data-value="dessert">Dessert</button>
+            <button class="option-btn" data-group="cuisines" data-value="healthy">Healthy</button>
+            <button class="option-btn" data-group="cuisines" data-value="vegetarian">Vegetarian</button>
+            <button class="option-btn" data-group="cuisines" data-value="vegan">Vegan</button>
+          </div>
+        </section>
+
+        <!-- Submit -->
+        <div class="submit-area">
+          <p id="search-error" class="field-error hidden"></p>
+          <button id="btn-find" class="btn-primary btn-large">🎲 Find My Food</button>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- PAGE 2: ROULETTE -->
+    <div id="page-roulette" class="page hidden">
+      <header class="header roulette-header">
+        <div class="logo">
+          <span class="logo-icon">🍽️</span>
+          <span class="logo-text">FindingMyFood</span>
+        </div>
+      </header>
+
+      <div class="roulette-area">
+        <div class="wheel-container">
+          <div class="wheel-pointer"></div>
+          <div class="wheel-wrapper" id="wheel-wrapper">
+            <canvas id="wheel-canvas"></canvas>
+          </div>
+        </div>
+
+        <button id="btn-spin" class="btn-primary btn-spin">SPIN</button>
+      </div>
+
+      <!-- Result Card -->
+      <div id="result-card" class="result-card hidden">
+        <div class="result-inner">
+          <p class="result-celebration">🎉 Tonight's choice is:</p>
+          <h2 id="result-name" class="result-name"></h2>
+          <div class="result-details">
+            <span id="result-price" class="result-badge"></span>
+            <span id="result-cuisine" class="result-badge"></span>
+            <span id="result-hours-badge" class="result-badge result-badge-hours hidden"></span>
+            <span id="result-rating-badge" class="result-badge badge-rating hidden"></span>
+            <span id="result-kids-badge" class="result-badge badge-kids hidden">🧒 Kids friendly</span>
+          </div>
+          <p id="result-hours-label" class="result-hours-label hidden"></p>
+          <p id="result-address" class="result-address"></p>
+          <div class="result-actions">
+            <a id="btn-maps" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary">🗺️ Open in Google Maps</a>
+            <button id="btn-spin-again" class="btn-secondary">🔄 Spin Again</button>
+            <button id="btn-back" class="btn-link">← Back to Search</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="roulette-footer">
+        <button id="btn-back-2" class="btn-link">← Back to Search</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

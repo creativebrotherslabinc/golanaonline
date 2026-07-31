@@ -1,0 +1,547 @@
+:root {
+  --orange: #FF7A00;
+  --orange-dark: #e06a00;
+  --orange-light: #fff4eb;
+  --dark: #1a1a1a;
+  --gray: #5a5a5a;
+  --gray-light: #f5f5f5;
+  --border: #e8e8e8;
+  --white: #ffffff;
+  --red: #e63946;
+  --success: #2a9d8f;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--gray-light);
+  color: var(--dark);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hidden { display: none !important; }
+
+/* ─── Pages ──────────────────────────────────── */
+.page { min-height: 100vh; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ─────────────────────────────────── */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 24px;
+  text-align: center;
+}
+
+.logo { display: inline-flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 28px; }
+.logo-text {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--orange);
+  letter-spacing: -0.5px;
+}
+.tagline { margin-top: 6px; font-size: 15px; color: var(--gray); }
+.roulette-header { padding: 14px 24px; }
+.roulette-header .logo-text { font-size: 22px; }
+
+/* ─── Search Form ─────────────────────────────── */
+.search-form {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 6px;
+  letter-spacing: 0.1px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Sub-text below card title */
+.card-hint {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.card-note {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 12px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* ─── Pool status (inline in cuisine title) ───── */
+.pool-status {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray);
+}
+
+.pool-loading {
+  color: var(--orange);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ─── Option Buttons (single & multi) ────────── */
+.option-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Grids with equal-width pills on a single row */
+.radius-grid          { flex-wrap: nowrap; }
+.radius-grid .option-btn { flex: 1; font-size: 13px; font-weight: 600; padding: 9px 6px; }
+
+.price-grid           { flex-wrap: nowrap; }
+.price-grid .option-btn { flex: 1; font-size: 16px; font-weight: 700; }
+
+.wheel-grid           { flex-wrap: nowrap; }
+.wheel-grid .option-btn { flex: 1; font-size: 15px; font-weight: 700; }
+
+.rating-grid          { gap: 6px; }
+.rating-grid .option-btn { flex: 1 1 auto; font-size: 13px; }
+
+.two-col .option-btn  { flex: 1 1 calc(50% - 4px); }
+
+.cuisine-grid .option-btn { flex: 0 1 auto; }
+
+.option-btn {
+  padding: 9px 16px;
+  border-radius: 50px;
+  border: 2px solid var(--border);
+  background: var(--white);
+  color: var(--gray);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.option-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.option-btn.selected {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* ─── Facet dimming ──────────────────────────── */
+/* Cuisine/dining buttons that have no results in the
+   nearby pool are dimmed but remain clickable        */
+.option-btn.dim-facet {
+  opacity: 0.28;
+  border-style: dashed;
+}
+
+.option-btn.dim-facet:hover {
+  opacity: 0.5;
+  border-color: var(--orange);
+  color: var(--orange);
+  border-style: solid;
+}
+
+/* ─── Feature Toggles (open now / kids / pub / brewery) */
+.toggles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.feature-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.feature-toggle:hover {
+  border-color: var(--success);
+  color: var(--dark);
+}
+
+.feature-toggle.active {
+  border-color: var(--success);
+  background: #e6f9f0;
+  color: #1a7a4a;
+}
+
+.toggle-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.feature-toggle.active .toggle-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(42,157,143,0.22);
+}
+
+/* ─── Location ────────────────────────────────── */
+.location-detecting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gray);
+  font-size: 14px;
+}
+
+.mini-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.location-denied-msg { font-size: 14px; color: var(--gray); margin-bottom: 10px; }
+
+.input-row { display: flex; gap: 8px; }
+
+.text-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.text-input:focus { border-color: var(--orange); }
+
+.location-confirmed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--dark);
+  font-weight: 500;
+}
+.location-icon { font-size: 18px; }
+
+.field-error { color: var(--red); font-size: 13px; margin-top: 8px; }
+
+/* ─── Buttons ────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(255,122,0,0.35);
+}
+.btn-primary:hover {
+  background: var(--orange-dark);
+  box-shadow: 0 6px 20px rgba(255,122,0,0.45);
+  transform: translateY(-1px);
+}
+.btn-primary:active  { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--orange);
+  border: 2px solid var(--orange);
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-secondary:hover { background: var(--orange-light); }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--gray);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px;
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+.btn-link:hover { color: var(--dark); }
+
+.btn-large {
+  width: 100%;
+  padding: 18px 32px;
+  font-size: 18px;
+  border-radius: 50px;
+}
+
+.submit-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ─── Loading Overlay ────────────────────────── */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,26,0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: var(--white);
+}
+
+.loading-spinner {
+  width: 52px;
+  height: 52px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+#loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Roulette Page ──────────────────────────── */
+.roulette-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 8px;
+  gap: 24px;
+}
+
+.wheel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 32px solid var(--orange);
+  z-index: 10;
+  filter: drop-shadow(0 2px 6px rgba(255,122,0,0.5));
+}
+
+.wheel-wrapper {
+  border-radius: 50%;
+  box-shadow: var(--shadow-lg), 0 0 0 6px var(--white), 0 0 0 8px var(--border);
+  transition: transform 6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+#wheel-canvas {
+  display: block;
+  border-radius: 50%;
+}
+
+.btn-spin {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 18px 56px;
+  border-radius: 50px;
+}
+
+/* ─── Result Card ────────────────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+  animation: slideUp 0.4s ease;
+}
+
+.result-inner {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  text-align: center;
+}
+
+.result-celebration {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 500;
+  padding: 22px 24px 4px;
+}
+
+.result-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--dark);
+  line-height: 1.25;
+  padding: 4px 24px 16px;
+}
+
+.result-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 0 24px 16px;
+}
+
+.result-badge {
+  padding: 5px 14px;
+  border-radius: 50px;
+  background: var(--orange-light);
+  color: var(--orange-dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-open    { background: #e6f9f0; color: #1a7a4a; }
+.badge-closed  { background: #fdecea; color: #c0392b; }
+.badge-kids    { background: #eef2ff; color: #4361ee; }
+.badge-rating  { background: #fffbea; color: #7c5c00; }
+
+.result-hours-label {
+  font-size: 12px;
+  color: var(--gray);
+  padding: 0 24px 8px;
+  font-weight: 500;
+}
+
+.result-address {
+  font-size: 14px;
+  color: var(--gray);
+  padding: 0 24px 20px;
+  line-height: 1.5;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.result-actions .btn-primary,
+.result-actions .btn-secondary { width: 100%; }
+.result-actions .btn-link { align-self: center; }
+
+.roulette-footer { text-align: center; padding: 12px 16px 24px; }
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 480px) {
+  .logo-text      { font-size: 22px; }
+  .tagline        { font-size: 14px; }
+  .card           { padding: 16px; }
+  .two-col .option-btn { font-size: 13px; padding: 10px 12px; }
+  .toggles-grid   { grid-template-columns: 1fr 1fr; }
+  .feature-toggle { font-size: 12px; padding: 9px 10px; }
+  .btn-spin       { padding: 16px 40px; font-size: 20px; }
+  .result-name    { font-size: 22px; }
+  .radius-grid .option-btn,
+  .wheel-grid .option-btn { font-size: 12px; padding: 8px 4px; }
+}
+
+@media (min-width: 768px) {
+  .roulette-area  { padding: 32px 24px 16px; }
+  .result-card    { padding: 0 24px 40px; }
+}
