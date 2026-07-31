@@ -257,33 +257,32 @@
           var desc = appsSection.querySelector('p');
           if (desc) desc.textContent = 'Full interactive apps that run right in your browser.';
 
-          // ── 3. Build FindingMyFood card by cloning a real tool card ──
-          var foodCard = templateCard.cloneNode(true);
-          // Navigate outside React Router (hard navigation)
-          foodCard.setAttribute('href', '/food-finder/');
-          foodCard.removeAttribute('data-discover');
+          // ── 3. Build FindingMyFood card from scratch with exact classes ──
+          // Card outer class copied verbatim from the compiled bundle
+          var cardClass = templateCard.className || 'group flex flex-col p-5 bg-card border rounded-xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200';
 
-          // Replace the SVG icon with the 🍽️ emoji, keeping the same wrapper
-          var svgEl = foodCard.querySelector('svg');
-          if (svgEl) {
-            var emojiNode = document.createElement('span');
-            emojiNode.setAttribute('aria-hidden', 'true');
-            emojiNode.className = svgEl.className;
-            emojiNode.style.fontSize = 'inherit';
-            emojiNode.textContent = '🍽️';
-            svgEl.parentNode.replaceChild(emojiNode, svgEl);
-          }
+          // Icon wrapper class — also from the bundle
+          var iconWrapClass = 'p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors';
 
-          // Replace every text node with "FindingMyFood"
-          var first = true;
-          (function replaceCardText(node) {
-            if (node.nodeType === 3 && node.textContent.trim()) {
-              node.textContent = first ? 'FindingMyFood' : '';
-              first = false;
-            } else {
-              node.childNodes.forEach(replaceCardText);
-            }
-          })(foodCard);
+          // Peek at the real inner row to capture its class too
+          var innerRow = templateCard.querySelector('div');
+          var rowClass = innerRow ? innerRow.className : 'flex items-center gap-3 mb-2';
+
+          // Peek at the real name span class
+          var nameSpan = templateCard.querySelector('span');
+          var nameClass = nameSpan ? nameSpan.className : 'font-semibold text-foreground';
+
+          // Utensils SVG (Lucide-style, matches w-5 h-5 sizing)
+          var utensilsSVG = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>';
+
+          var foodCard = document.createElement('a');
+          foodCard.href = '/food-finder/';
+          foodCard.className = cardClass;
+          foodCard.innerHTML =
+            '<div class="' + rowClass + '">' +
+              '<div class="' + iconWrapClass + '">' + utensilsSVG + '</div>' +
+              '<span class="' + nameClass + '">FindingMyFood</span>' +
+            '</div>';
 
           // ── 4. Clear the cloned grid and add only our card ────────
           var grid = appsSection.querySelector('[class*="grid"]');
