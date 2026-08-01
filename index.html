@@ -574,6 +574,24 @@
       })();
 
       // ══════════════════════════════════════════════════════════════
+      // 5b · LOGO SWAP — replace the React-rendered navbar logo img
+      // with our favicon.png on every navigation.
+      // ══════════════════════════════════════════════════════════════
+      function injectLogo() {
+        var header = document.querySelector('header');
+        if (!header) return false;
+        // The React app renders a logo <img> inside a link in the header
+        var logoImg = header.querySelector('a img, img');
+        if (!logoImg) return false;
+        if (logoImg.getAttribute('data-golana-logo')) return true; // already swapped
+        logoImg.src = '/favicon.png';
+        logoImg.setAttribute('data-golana-logo', '1');
+        // Keep it square and crisp at the same size the original used
+        logoImg.style.cssText += ';width:32px;height:32px;object-fit:contain;border-radius:6px;';
+        return true;
+      }
+
+      // ══════════════════════════════════════════════════════════════
       // 6 · RUN ALL INJECTIONS (called after every SPA navigation)
       // Retries up to 15× at 150 ms intervals until all injections land.
       // ══════════════════════════════════════════════════════════════
@@ -581,6 +599,7 @@
         attempt = attempt || 0;
         var done = true;
         done = injectHamburger() && done;
+        done = injectLogo()      && done;
         if (injectSearch) done = (injectSearch() !== false) && done;
         if (injectApps)   done = (injectApps()   !== false) && done;
         if (!done && attempt < 15) {
