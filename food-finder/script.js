@@ -559,6 +559,24 @@ async function onFindMyFood() {
     state.restaurants = results;
     state.currentRotation = 0;
     initRoulette(results);
+
+    // Show notice if fewer restaurants were found than the selected wheel size
+    const noticeEl   = document.getElementById('wheel-size-notice');
+    const wheelSize  = parseInt(state.prefs.wheelSize) || 10;
+    if (noticeEl) {
+      if (results.length < wheelSize) {
+        const cuisine = state.prefs.cuisines.length > 0
+          ? state.prefs.cuisines.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' / ')
+          : null;
+        noticeEl.textContent = cuisine
+          ? `Only ${results.length} ${cuisine} restaurant${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`
+          : `Only ${results.length} restaurant${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`;
+        noticeEl.classList.remove('hidden');
+      } else {
+        noticeEl.classList.add('hidden');
+      }
+    }
+
     showPage('page-roulette');
   } catch (err) {
     hideLoading();
@@ -578,13 +596,18 @@ async function fetchRestaurants() {
   // 1. Primary search with all selected filters
   let results = await runSearch(state.prefs.cuisines, radius);
 
-  // 2. If fewer than 3 results, drop cuisine filter
-  if (results.length < 3 && state.prefs.cuisines.length > 0) {
+  // 2. No results with cuisine → widen radius (keep cuisine filter)
+  if (results.length === 0 && state.prefs.cuisines.length > 0) {
+    results = await runSearch(state.prefs.cuisines, Math.min(radius * 2, 20000));
+  }
+
+  // 3. Still no results → drop cuisine, try original radius
+  if (results.length === 0 && state.prefs.cuisines.length > 0) {
     results = await runSearch([], radius);
   }
 
-  // 3. Still fewer than 3 → double the radius
-  if (results.length < 3) {
+  // 4. Still nothing → drop cuisine + double radius
+  if (results.length === 0) {
     results = await runSearch([], Math.min(radius * 2, 20000));
   }
 
@@ -672,7 +695,10 @@ function buildOverpassQuery(cuisines, radius) {
     }
   }
 
-  return `[out:json][timeout:30];\n(\n${lines.join('\n')}\n);\nout center 60;`;
+  // Fetch more results when a cuisine is specified so we capture all matching
+  // restaurants in the area (niche cuisines may have fewer than 60 total).
+  const limit = cuisines.length > 0 ? 200 : 60;
+  return `[out:json][timeout:30];\n(\n${lines.join('\n')}\n);\nout center ${limit};`;
 }
 
 async function runOverpassQuery(query, signal) {
