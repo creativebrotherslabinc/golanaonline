@@ -75,17 +75,20 @@
           <h2 class="card-title">📍 Your Location</h2>
           <div id="location-auto" class="location-status">
             <div class="location-detecting">
-              <div class="mini-spinner"></div>
-              <span>Detecting your location…</span>
+              <div class="mini-spinner" id="geo-spinner"></div>
+              <span id="geo-detecting-text">Detecting your location…</span>
             </div>
+            <button id="btn-use-gps" class="btn-use-gps" aria-label="Use GPS location">
+              📍 Use My Location
+            </button>
           </div>
           <div id="location-manual" class="location-manual hidden">
-            <p class="location-denied-msg">Location access denied. Enter your city or postal code:</p>
+            <p class="location-denied-msg">Enter your city or postal code:</p>
             <div class="input-row">
-              <input type="text" id="manual-location" class="text-input" placeholder="e.g. New York, NY or 10001" />
+              <input type="text" id="manual-location" class="text-input" placeholder="e.g. Tokyo, Japan · Paris, France · 10001 US" />
               <button id="btn-geocode" class="btn-secondary">Search</button>
             </div>
-            <p id="geocode-error" class="field-error hidden">Could not find that location. Try a different city or postal code.</p>
+            <p id="geocode-error" class="field-error hidden">Location not found. Try adding the country name — e.g. "10001 US" or "Paris, France".</p>
           </div>
           <div id="location-confirmed" class="location-confirmed hidden">
             <span class="location-icon">✅</span>

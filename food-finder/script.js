@@ -194,6 +194,24 @@ function setupEventListeners() {
     if (e.key === 'Enter') geocodeManualLocation();
   });
   document.getElementById('btn-change-location').addEventListener('click', resetLocation);
+
+  // GPS button — explicit user-gesture trigger (more reliable on mobile)
+  document.getElementById('btn-use-gps').addEventListener('click', () => {
+    if (!navigator.geolocation) { showManualLocation(false); return; }
+    _clearGeoTimer();
+    // Hide the manual form while we wait, show spinner
+    document.getElementById('location-manual').classList.add('hidden');
+    setGeoDetecting(true);
+    _geoSafetyTimer = setTimeout(() => {
+      setGeoDetecting(false);
+      showManualLocation(true);
+    }, 15000);
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+      enableHighAccuracy: true,
+      timeout: 12000,
+      maximumAge: 0,  // force fresh reading
+    });
+  });
   document.getElementById('btn-find').addEventListener('click', onFindMyFood);
   document.getElementById('btn-spin').addEventListener('click', onSpin);
   document.getElementById('btn-spin-again').addEventListener('click', onSpinAgain);
@@ -210,22 +228,46 @@ function setupEventListeners() {
 // Safety net: if the browser's geolocation never calls back (silent hang on
 // some mobile browsers / production deployments), fall back to manual input.
 let _geoSafetyTimer = null;
+let _geoRequested   = false;  // true once getCurrentPosition has been called
 
 function requestGeolocation() {
   if (!navigator.geolocation) { showManualLocation(); return; }
 
+  _geoRequested = true;
+  setGeoDetecting(true);
+
   // Browser-level timeout is 10 s, but some browsers ignore it.
   // Our own timer guarantees we never leave the user staring at the spinner.
+  // On the first auto-attempt we give a bit longer (15 s) in case the
+  // OS permission prompt takes time to appear on mobile.
   _geoSafetyTimer = setTimeout(() => {
-    console.warn('Geolocation timed out — showing manual input');
-    showManualLocation();
-  }, 12000);
+    console.warn('Geolocation timed out — showing GPS button + manual input');
+    setGeoDetecting(false);
+    showManualLocation(true); // show both GPS button and manual form
+  }, 15000);
 
   navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
-    enableHighAccuracy: false,
-    timeout: 10000,
-    maximumAge: 120000,
+    enableHighAccuracy: true,   // use GPS chip on phones when available
+    timeout: 12000,
+    maximumAge: 60000,
   });
+}
+
+// Show/hide the spinner and detecting text inside #location-auto
+function setGeoDetecting(active) {
+  const spinner = document.getElementById('geo-spinner');
+  const text    = document.getElementById('geo-detecting-text');
+  const gpsbtn  = document.getElementById('btn-use-gps');
+  if (!spinner) return;
+  if (active) {
+    spinner.style.display = '';
+    text.style.display    = '';
+    gpsbtn.style.display  = 'none';
+  } else {
+    spinner.style.display = 'none';
+    text.style.display    = 'none';
+    gpsbtn.style.display  = '';
+  }
 }
 
 function _clearGeoTimer() {
@@ -249,26 +291,39 @@ async function onGeoSuccess(pos) {
 
 function onGeoError(err) {
   _clearGeoTimer();
+  setGeoDetecting(false);
   const msgs = {
-    1: 'Location access was denied. Enter your city or postal code below.',
+    1: 'Location access was denied. Tap "Use My Location" to try again, or enter your location below.',
     2: 'Your location could not be determined. Enter it manually below.',
-    3: 'Location request timed out. Enter your city or postal code below.',
+    3: 'Location request timed out. Tap "Use My Location" to retry, or enter your location below.',
   };
   const manual = document.getElementById('location-manual');
   const denied = manual?.querySelector('.location-denied-msg');
   if (denied) denied.textContent = msgs[err?.code] || msgs[2];
-  showManualLocation();
+  // Show GPS button + manual form so user can retry or type
+  showManualLocation(true);
 }
 
-function showManualLocation() {
-  document.getElementById('location-auto').classList.add('hidden');
-  document.getElementById('location-manual').classList.remove('hidden');
+// showGpsBtn = true  → show both the GPS retry button and the manual form
+// showGpsBtn = false → show only the manual form (e.g. GPS not supported)
+function showManualLocation(showGpsBtn) {
+  const autoEl   = document.getElementById('location-auto');
+  const manualEl = document.getElementById('location-manual');
+  if (showGpsBtn) {
+    // Keep #location-auto visible (it now just shows the GPS button)
+    autoEl.classList.remove('hidden');
+    setGeoDetecting(false);
+  } else {
+    autoEl.classList.add('hidden');
+  }
+  manualEl.classList.remove('hidden');
 }
 
 function resetLocation() {
   state.lat = state.lon = null;
   state.locationLabel = '';
   state.pool = [];
+  _geoRequested = false;
   document.getElementById('location-confirmed').classList.add('hidden');
   document.getElementById('location-auto').classList.remove('hidden');
   document.getElementById('location-manual').classList.add('hidden');
