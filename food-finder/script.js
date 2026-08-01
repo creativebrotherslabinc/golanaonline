@@ -197,7 +197,6 @@ function setupEventListeners() {
   document.getElementById('btn-find').addEventListener('click', onFindMyFood);
   document.getElementById('btn-spin').addEventListener('click', onSpin);
   document.getElementById('btn-spin-again').addEventListener('click', onSpinAgain);
-  document.getElementById('btn-back').addEventListener('click', () => showPage('page-search'));
   document.getElementById('btn-back-2').addEventListener('click', () => showPage('page-search'));
 
   setupToggle('btn-open-now',  'openNow',     updateFacets);

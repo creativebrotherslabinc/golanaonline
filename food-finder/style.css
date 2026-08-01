@@ -679,6 +679,26 @@ body {
 
 .roulette-footer { text-align: center; padding: 12px 16px 24px; }
 
+.btn-back-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  border: 2px solid var(--border);
+  background: var(--white);
+  color: var(--dark);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.btn-back-search:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #f0f4ff;
+}
+
 /* ─── Responsive ─────────────────────────────── */
 @media (max-width: 480px) {
   .logo-text      { font-size: 22px; }
