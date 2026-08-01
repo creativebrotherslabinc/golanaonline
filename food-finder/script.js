@@ -448,17 +448,30 @@ async function fetchPool() {
 }
 
 function setPoolStatus(status) {
-  const el = document.getElementById('pool-status');
+  const el  = document.getElementById('pool-status');
+  const btn = document.getElementById('btn-find');
   if (!el) return;
+
   if (status === 'loading') {
     el.textContent = '· scanning nearby…';
     el.className   = 'pool-status pool-loading';
-  } else if (status === 'ready' && state.pool.length) {
-    el.textContent = `· ${state.pool.length} nearby`;
-    el.className   = 'pool-status';
+    // Disable Find button until the scan finishes — firing both Overpass
+    // queries simultaneously causes rate-limit errors on the main search.
+    if (btn) {
+      btn.disabled    = true;
+      btn.textContent = '⏳ Scanning nearby…';
+    }
   } else {
-    el.textContent = '';
-    el.className   = 'pool-status';
+    if (status === 'ready' && state.pool.length) {
+      el.textContent = `· ${state.pool.length} nearby`;
+    } else {
+      el.textContent = '';
+    }
+    el.className = 'pool-status';
+    if (btn) {
+      btn.disabled    = false;
+      btn.textContent = '🎲 Find My Food';
+    }
   }
 }
 
@@ -577,44 +590,50 @@ async function onFindMyFood() {
 
   showLoading('Searching for restaurants near you…');
 
+  let results = [];
   try {
-    const results = await fetchRestaurants();
-    hideLoading();
-
-    if (!results.length) {
-      errEl.textContent = 'No results found. Try a larger distance, different cuisine, or relax some filters.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-
-    state.restaurants = results;
-    state.currentRotation = 0;
-    initRoulette(results);
-
-    // Show notice if fewer restaurants were found than the selected wheel size
-    const noticeEl   = document.getElementById('wheel-size-notice');
-    const wheelSize  = parseInt(state.prefs.wheelSize) || 10;
-    if (noticeEl) {
-      if (results.length < wheelSize) {
-        const cuisine = state.prefs.cuisines.length > 0
-          ? state.prefs.cuisines.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' / ')
-          : null;
-        noticeEl.textContent = cuisine
-          ? `Only ${results.length} ${cuisine} restaurant${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`
-          : `Only ${results.length} restaurant${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`;
-        noticeEl.classList.remove('hidden');
-      } else {
-        noticeEl.classList.add('hidden');
-      }
-    }
-
-    showPage('page-roulette');
+    results = await fetchRestaurants();
   } catch (err) {
-    hideLoading();
-    errEl.textContent = 'Could not fetch restaurants. Check your connection and try again.';
-    errEl.classList.remove('hidden');
-    console.error(err);
+    console.warn('Main search failed, falling back to pool:', err);
+    // If the Overpass query errored (e.g. rate-limited during pool scan),
+    // fall back to whatever the pool already has.
+    if (state.pool.length > 0) {
+      const clientFiltered = clientFilter(state.pool, state.prefs);
+      results = clientFiltered.length > 0 ? clientFiltered : [...state.pool];
+    }
   }
+
+  hideLoading();
+
+  // If we truly have nothing at all, show a gentle message — don't crash.
+  if (!results.length) {
+    errEl.textContent = 'No places found nearby. Try increasing the distance or relaxing your filters.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const wheelSize = parseInt(state.prefs.wheelSize) || 10;
+  state.restaurants = results;
+  state.currentRotation = 0;
+  initRoulette(results);
+
+  // Show notice if fewer restaurants than the selected wheel size were found
+  const noticeEl = document.getElementById('wheel-size-notice');
+  if (noticeEl) {
+    if (results.length < wheelSize) {
+      const cuisine = !state.prefs.breweryMode && state.prefs.cuisines.length > 0
+        ? state.prefs.cuisines.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' / ')
+        : null;
+      noticeEl.textContent = cuisine
+        ? `Only ${results.length} ${cuisine} restaurant${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`
+        : `Only ${results.length} place${results.length !== 1 ? 's' : ''} found nearby — showing all on the wheel`;
+      noticeEl.classList.remove('hidden');
+    } else {
+      noticeEl.classList.add('hidden');
+    }
+  }
+
+  showPage('page-roulette');
 }
 
 // ── Overpass Search ────────────────────────────────────────────────────────
@@ -643,9 +662,16 @@ async function fetchRestaurants() {
     }
   }
 
-  // 4. Still nothing → widen radius
+  // 4. Still nothing → widen radius, drop all cuisine/mode constraints
   if (results.length === 0) {
     results = await runSearch([], Math.min(radius * 2, 20000));
+  }
+
+  // 5. Last resort — use the already-fetched pool so we always have something
+  //    to spin. Apply client-side filters first; if still empty, show anything.
+  if (results.length === 0 && state.pool.length > 0) {
+    const clientFiltered = clientFilter(state.pool, state.prefs);
+    results = clientFiltered.length > 0 ? clientFiltered : [...state.pool];
   }
 
   // Attach live data
