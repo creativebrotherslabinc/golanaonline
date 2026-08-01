@@ -54,32 +54,62 @@
     <div id="root"></div>
   <script>
     (function() {
-      // ── Logo replacement ──────────────────────────────────────────
-      function replaceLogo() {
-        var svg = document.querySelector('header a svg.w-5, header a svg[class*="w-5"]');
-        if (svg) {
-          var parent = svg.parentElement;
-          var img = document.createElement('img');
-          img.src = '/favicon.png';
-          img.style.width = '20px';
-          img.style.height = '20px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '2px';
-          parent.replaceChild(img, svg);
-          return true;
+
+      // ══════════════════════════════════════════════════════════════
+      // 1 · FAVICON ENFORCER
+      // The React bundle injects <link rel="icon" type="image/svg+xml">
+      // on every SPA navigation. Watch <head> and keep favicon.png.
+      // ══════════════════════════════════════════════════════════════
+      (function() {
+        function enforcePng() {
+          var hasPng = false;
+          document.head.querySelectorAll('link[rel*="icon"]').forEach(function(l) {
+            if (l.getAttribute('href') === '/favicon.png') { hasPng = true; return; }
+            l.parentNode.removeChild(l); // remove SVG or other icon links
+          });
+          if (!hasPng) {
+            var lnk = document.createElement('link');
+            lnk.rel = 'icon'; lnk.type = 'image/png'; lnk.href = '/favicon.png';
+            document.head.appendChild(lnk);
+          }
         }
-        return false;
-      }
-      if (!replaceLogo()) {
-        var logoObserver = new MutationObserver(function() {
-          if (replaceLogo()) logoObserver.disconnect();
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-          logoObserver.observe(document.body, { childList: true, subtree: true });
-        });
+        enforcePng();
+        var headObs = new MutationObserver(enforcePng);
+        var startHeadObs = function() { headObs.observe(document.head, { childList: true }); };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', startHeadObs);
+        } else {
+          startHeadObs();
+        }
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 2 · NAVIGATION HOOK — scroll-to-top + schedule re-injection
+      // Called on every SPA push/pop so injections survive back-nav.
+      // ══════════════════════════════════════════════════════════════
+      var _reinjTimer = null;
+      function scheduleReinjection() {
+        clearTimeout(_reinjTimer);
+        // React needs ~150-200 ms to finish re-rendering after navigation
+        _reinjTimer = setTimeout(runAllInjections, 200);
       }
 
-      // ── /games redirect → /#games ────────────────────────────────
+      (function() {
+        var orig = history.pushState;
+        history.pushState = function() {
+          orig.apply(this, arguments);
+          window.scrollTo(0, 0);
+          scheduleReinjection();
+        };
+        window.addEventListener('popstate', function() {
+          window.scrollTo(0, 0);
+          scheduleReinjection();
+        });
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 3 · /games REDIRECT
+      // ══════════════════════════════════════════════════════════════
       if (window.location.pathname === '/games') {
         window.history.replaceState(null, '', '/');
         document.addEventListener('DOMContentLoaded', function() {
@@ -90,123 +120,116 @@
         });
       }
 
-      // ── Scroll to top on every SPA navigation ────────────────────
-      (function() {
-        var orig = history.pushState;
-        history.pushState = function() {
-          orig.apply(this, arguments);
-          window.scrollTo(0, 0);
-        };
-        window.addEventListener('popstate', function() {
-          window.scrollTo(0, 0);
-        });
-      })();
+      // ══════════════════════════════════════════════════════════════
+      // 4 · LOGO REPLACEMENT
+      // Guard: DOM presence — header anchor already has an <img>
+      // ══════════════════════════════════════════════════════════════
+      function replaceLogo() {
+        if (document.querySelector('header a img.__golana-logo')) return true;
+        var svg = document.querySelector('header a svg.w-5, header a svg[class*="w-5"]');
+        if (!svg) return false;
+        var img = document.createElement('img');
+        img.src = '/favicon.png';
+        img.className = '__golana-logo';
+        img.style.cssText = 'width:20px;height:20px;object-fit:cover;border-radius:2px;display:block';
+        svg.parentNode.replaceChild(img, svg);
+        return true;
+      }
 
-      // ── Replace header nav with hamburger dropdown ────────────────
-      (function() {
-        var CATEGORIES = [
-          { label: '📄 PDF Tools',          href: '/pdf/merger'         },
-          { label: '🖼️ Media',              href: '/media/img-compressor'},
-          { label: '💰 Calculators',         href: '/calc/mortgage'      },
-          { label: '🛠️ Everyday Utilities',  href: '/tools/qr'           },
-          { label: '🤖 AI Mini Tools',       href: '/ai/summarizer'      },
-          { label: '</> Developer Tools',    href: '/dev/diff'           },
-          { label: '🕐 Time & Planning',     href: '/time/worldclock'    },
-          { label: '🎮 Games',               href: '/games/ttt'          },
-          { label: '📱 Apps',                href: '/#apps', isAnchor: true },
-        ];
+      // ══════════════════════════════════════════════════════════════
+      // 5 · HAMBURGER NAV
+      // Guard: DOM presence — .golana-wrap element
+      // Styles injected only once via JS flag.
+      // ══════════════════════════════════════════════════════════════
+      var CATEGORIES = [
+        { label: '📄 PDF Tools',          href: '/pdf/merger'          },
+        { label: '🖼️ Media',              href: '/media/img-compressor' },
+        { label: '💰 Calculators',         href: '/calc/mortgage'       },
+        { label: '🛠️ Everyday Utilities',  href: '/tools/qr'            },
+        { label: '🤖 AI Mini Tools',       href: '/ai/summarizer'       },
+        { label: '</> Developer Tools',    href: '/dev/diff'            },
+        { label: '🕐 Time & Planning',     href: '/time/worldclock'     },
+        { label: '🎮 Games',               href: '/games/ttt'           },
+        { label: '📱 Apps',                href: '/#apps', isAnchor: true },
+      ];
+      var _hbStyleDone = false;
 
-        var STYLES = [
-          '.golana-hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;background:none;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0}',
-          '.golana-hamburger:hover{background:#f1f5f9;border-color:#cbd5e1}',
-          '.golana-hamburger span{display:block;height:2px;background:#475569;border-radius:2px}',
-          '.golana-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;z-index:9999;animation:gdIn .15s ease}',
-          '.golana-dropdown.open{display:block}',
-          '@keyframes gdIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}',
-          '.golana-dropdown a{display:block;padding:11px 18px;font-size:.875rem;font-weight:500;color:#334155;text-decoration:none;transition:background .1s,color .1s;border-bottom:1px solid #f1f5f9}',
-          '.golana-dropdown a:last-child{border-bottom:none}',
-          '.golana-dropdown a:hover{background:#f8fafc;color:#2563eb}',
-          '.golana-wrap{position:relative;margin-left:auto}',
-        ].join('');
+      function injectHamburger() {
+        if (document.querySelector('.golana-wrap')) return true; // already in DOM
+        var header = document.querySelector('header');
+        if (!header) return false;
+        var reactNav = header.querySelector('nav');
+        if (!reactNav) return false;
 
-        function injectHamburger() {
-          if (document.getElementById('__nav-injected')) return true;
-          var header = document.querySelector('header');
-          if (!header) return false;
-          var reactNav = header.querySelector('nav');
-          if (!reactNav) return false;
-
-          // Inject stylesheet
+        if (!_hbStyleDone) {
           var style = document.createElement('style');
-          style.textContent = STYLES;
+          style.textContent = [
+            '.golana-hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;background:none;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0}',
+            '.golana-hamburger:hover{background:#f1f5f9;border-color:#cbd5e1}',
+            '.golana-hamburger span{display:block;height:2px;background:#475569;border-radius:2px}',
+            '.golana-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;z-index:9999;animation:gdIn .15s ease}',
+            '.golana-dropdown.open{display:block}',
+            '@keyframes gdIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}',
+            '.golana-dropdown a{display:block;padding:11px 18px;font-size:.875rem;font-weight:500;color:#334155;text-decoration:none;transition:background .1s,color .1s;border-bottom:1px solid #f1f5f9}',
+            '.golana-dropdown a:last-child{border-bottom:none}',
+            '.golana-dropdown a:hover{background:#f8fafc;color:#2563eb}',
+            '.golana-wrap{position:relative;margin-left:auto}',
+          ].join('');
           document.head.appendChild(style);
-
-          // Find the inner flex container (has h-16 and flex items-center)
-          var innerContainer = header.querySelector('div[class*="h-16"]') || header;
-
-          // Hide React nav and its own mobile hamburger button
-          reactNav.style.display = 'none';
-          header.querySelectorAll('button').forEach(function(b) { b.style.display = 'none'; });
-
-          // Build wrapper → button + dropdown
-          var wrap = document.createElement('div');
-          wrap.className = 'golana-wrap';
-
-          var btn = document.createElement('button');
-          btn.className = 'golana-hamburger';
-          btn.setAttribute('aria-label', 'Open menu');
-          btn.setAttribute('aria-expanded', 'false');
-          btn.innerHTML = '<span></span><span></span><span></span>';
-
-          var dd = document.createElement('div');
-          dd.className = 'golana-dropdown';
-          dd.setAttribute('aria-hidden', 'true');
-
-          CATEGORIES.forEach(function(item) {
-            var a = document.createElement('a');
-            a.textContent = item.label;
-            if (item.isAnchor) {
-              a.href = '#';
-              a.addEventListener('click', function(e) {
-                e.preventDefault();
-                dd.classList.remove('open');
-                var sec = document.getElementById('apps');
-                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-              });
-            } else {
-              a.href = item.href;
-            }
-            dd.appendChild(a);
-          });
-
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var open = dd.classList.toggle('open');
-            btn.setAttribute('aria-expanded', open);
-            dd.setAttribute('aria-hidden', !open);
-          });
-
-          document.addEventListener('click', function() {
-            dd.classList.remove('open');
-            btn.setAttribute('aria-expanded', 'false');
-          });
-
-          wrap.appendChild(btn);
-          wrap.appendChild(dd);
-          innerContainer.appendChild(wrap);
-
-          var m = document.createElement('meta');
-          m.id = '__nav-injected';
-          document.head.appendChild(m);
-          return true;
+          _hbStyleDone = true;
         }
 
-        var obs = new MutationObserver(function() { if (injectHamburger()) obs.disconnect(); });
-        document.addEventListener('DOMContentLoaded', function() {
-          obs.observe(document.body, { childList: true, subtree: true });
-          setTimeout(function() { injectHamburger(); obs.disconnect(); }, 3000);
+        var innerContainer = header.querySelector('div[class*="h-16"]') || header;
+        reactNav.style.display = 'none';
+        header.querySelectorAll('button').forEach(function(b) { b.style.display = 'none'; });
+
+        var wrap = document.createElement('div');
+        wrap.className = 'golana-wrap';
+
+        var btn = document.createElement('button');
+        btn.className = 'golana-hamburger';
+        btn.setAttribute('aria-label', 'Open menu');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.innerHTML = '<span></span><span></span><span></span>';
+
+        var dd = document.createElement('div');
+        dd.className = 'golana-dropdown';
+        dd.setAttribute('aria-hidden', 'true');
+
+        CATEGORIES.forEach(function(item) {
+          var a = document.createElement('a');
+          a.textContent = item.label;
+          if (item.isAnchor) {
+            a.href = '#';
+            a.addEventListener('click', function(e) {
+              e.preventDefault();
+              dd.classList.remove('open');
+              var sec = document.getElementById('apps');
+              if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            });
+          } else {
+            a.href = item.href;
+          }
+          dd.appendChild(a);
         });
-      })();
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var open = dd.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open);
+          dd.setAttribute('aria-hidden', !open);
+        });
+
+        document.addEventListener('click', function() {
+          dd.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+
+        wrap.appendChild(btn);
+        wrap.appendChild(dd);
+        innerContainer.appendChild(wrap);
+        return true;
+      }
 
       // ── Apps category + FindingMyFood injection ──────────────────
       (function() {
