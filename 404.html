@@ -3,25 +3,646 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Go Lana – Free Online Tools | golana.online</title>
-    <meta name="description" content="Go Lana – Library of All Needed Apps. Free online tools for PDF, calculators, utilities, AI, and more at golana.online" />
+    <title>Go LANA – Free Online Tools | golana.online</title>
+    <meta name="description" content="Go LANA – Library of All Needed Apps. Free online tools for PDF, calculators, utilities, AI, and more at golana.online" />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Go Lana – Free Online Tools | golana.online" />
-    <meta property="og:description" content="Go Lana – Library of All Needed Apps. Free online tools at golana.online" />
+    <meta property="og:title" content="Go LANA – Free Online Tools | golana.online" />
+    <meta property="og:description" content="Go LANA – Library of All Needed Apps. Free online tools at golana.online" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Go Lana – Free Online Tools | golana.online" />
-    <meta name="twitter:description" content="Go Lana – Library of All Needed Apps. Free online tools at golana.online"/>
+    <meta name="twitter:title" content="Go LANA – Free Online Tools | golana.online" />
+    <meta name="twitter:description" content="Go LANA – Library of All Needed Apps. Free online tools at golana.online"/>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1838841424732275"
      crossorigin="anonymous"></script>
-    <script type="module" crossorigin src="/assets/index-MJ358mDA.js"></script>
+    <script type="module" crossorigin src="/assets/index-MJ358mDA-v2.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CupsWWkV.css">
+    <style>
+      /*
+       * Fix: the app root uses "min-h-screen flex flex-col" with main "flex-1"
+       * (flex-basis:0). This causes the document to stay exactly 100 vh tall —
+       * content inside <main> overflows without making the page scrollable.
+       * Solution: let main's intrinsic height drive the document height.
+       */
+      main {
+        flex-basis: auto !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Collapse ad slots that Google never filled (adsbygoogle.js blocked) */
+      ins.adsbygoogle[data-ad-status="unfilled"],
+      ins.adsbygoogle[data-ad-status="error"] {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+      }
+      div:has(> ins.adsbygoogle[data-ad-status="unfilled"]),
+      div:has(> ins.adsbygoogle[data-ad-status="error"]) {
+        min-height: 0 !important;
+        height: 0 !important;
+      }
+      div:has(> div > ins.adsbygoogle[data-ad-status="unfilled"]),
+      div:has(> div > ins.adsbygoogle[data-ad-status="error"]) {
+        margin-bottom: 0 !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+  <script>
+    (function() {
+
+      // ══════════════════════════════════════════════════════════════
+      // 1 · FAVICON ENFORCER
+      // The React bundle injects <link rel="icon" type="image/svg+xml">
+      // on every SPA navigation. Watch <head> and keep favicon.png.
+      // ══════════════════════════════════════════════════════════════
+      (function() {
+        function enforcePng() {
+          var hasPng = false;
+          document.head.querySelectorAll('link[rel*="icon"]').forEach(function(l) {
+            if (l.getAttribute('href') === '/favicon.png') { hasPng = true; return; }
+            l.parentNode.removeChild(l); // remove SVG or other icon links
+          });
+          if (!hasPng) {
+            var lnk = document.createElement('link');
+            lnk.rel = 'icon'; lnk.type = 'image/png'; lnk.href = '/favicon.png';
+            document.head.appendChild(lnk);
+          }
+        }
+        enforcePng();
+        var headObs = new MutationObserver(enforcePng);
+        var startHeadObs = function() { headObs.observe(document.head, { childList: true }); };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', startHeadObs);
+        } else {
+          startHeadObs();
+        }
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 2 · NAVIGATION HOOK — scroll-to-top + schedule re-injection
+      // Called on every SPA push/pop so injections survive back-nav.
+      // ══════════════════════════════════════════════════════════════
+      var _reinjTimer = null;
+      function scheduleReinjection() {
+        clearTimeout(_reinjTimer);
+        // React needs ~150-200 ms to finish re-rendering after navigation
+        _reinjTimer = setTimeout(runAllInjections, 200);
+      }
+
+      (function() {
+        var orig = history.pushState;
+        history.pushState = function() {
+          orig.apply(this, arguments);
+          window.scrollTo(0, 0);
+          scheduleReinjection();
+        };
+        window.addEventListener('popstate', function() {
+          window.scrollTo(0, 0);
+          scheduleReinjection();
+        });
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 3 · /games REDIRECT
+      // ══════════════════════════════════════════════════════════════
+      if (window.location.pathname === '/games') {
+        window.history.replaceState(null, '', '/');
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(function() {
+            var el = document.getElementById('games');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        });
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 4 · HAMBURGER NAV
+      // Guard: DOM presence — .golana-wrap element
+      // Styles injected only once via JS flag.
+      // ══════════════════════════════════════════════════════════════
+      var CATEGORIES = [
+        { label: '📄 PDF Tools',          href: '/pdf/merger'          },
+        { label: '🖼️ Media',              href: '/media/img-compressor' },
+        { label: '💰 Calculators',         href: '/calc/mortgage'       },
+        { label: '🛠️ Everyday Utilities',  href: '/tools/qr'            },
+        { label: '🤖 AI Mini Tools',       href: '/ai/summarizer'       },
+        { label: '</> Developer Tools',    href: '/dev/diff'            },
+        { label: '🕐 Time & Planning',     href: '/time/worldclock'     },
+        { label: '🎮 Games',               href: '/games/ttt'           },
+        { label: '📱 Apps',                href: '/#apps', isAnchor: true },
+      ];
+      var _hbStyleDone = false;
+
+      function injectHamburger() {
+        if (document.querySelector('.golana-wrap')) return true; // already in DOM
+        var header = document.querySelector('header');
+        if (!header) return false;
+        var reactNav = header.querySelector('nav');
+        if (!reactNav) return false;
+
+        if (!_hbStyleDone) {
+          var style = document.createElement('style');
+          style.textContent = [
+            '.golana-hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;background:none;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0}',
+            '.golana-hamburger:hover{background:#f1f5f9;border-color:#cbd5e1}',
+            '.golana-hamburger span{display:block;height:2px;background:#475569;border-radius:2px}',
+            '.golana-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;z-index:9999;animation:gdIn .15s ease}',
+            '.golana-dropdown.open{display:block}',
+            '@keyframes gdIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}',
+            '.golana-dropdown a{display:block;padding:11px 18px;font-size:.875rem;font-weight:500;color:#334155;text-decoration:none;transition:background .1s,color .1s;border-bottom:1px solid #f1f5f9}',
+            '.golana-dropdown a:last-child{border-bottom:none}',
+            '.golana-dropdown a:hover{background:#f8fafc;color:#2563eb}',
+            '.golana-wrap{position:relative;margin-left:auto}',
+          ].join('');
+          document.head.appendChild(style);
+          _hbStyleDone = true;
+        }
+
+        var innerContainer = header.querySelector('div[class*="h-16"]') || header;
+        reactNav.style.display = 'none';
+        header.querySelectorAll('button').forEach(function(b) { b.style.display = 'none'; });
+
+        var wrap = document.createElement('div');
+        wrap.className = 'golana-wrap';
+
+        var btn = document.createElement('button');
+        btn.className = 'golana-hamburger';
+        btn.setAttribute('aria-label', 'Open menu');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.innerHTML = '<span></span><span></span><span></span>';
+
+        var dd = document.createElement('div');
+        dd.className = 'golana-dropdown';
+        dd.setAttribute('aria-hidden', 'true');
+
+        CATEGORIES.forEach(function(item) {
+          var a = document.createElement('a');
+          a.textContent = item.label;
+          if (item.isAnchor) {
+            a.href = '#';
+            a.addEventListener('click', function(e) {
+              e.preventDefault();
+              dd.classList.remove('open');
+              var sec = document.getElementById('apps');
+              if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            });
+          } else {
+            a.href = item.href;
+          }
+          dd.appendChild(a);
+        });
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var open = dd.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open);
+          dd.setAttribute('aria-hidden', !open);
+        });
+
+        document.addEventListener('click', function() {
+          dd.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+
+        wrap.appendChild(btn);
+        wrap.appendChild(dd);
+        innerContainer.appendChild(wrap);
+        return true;
+      }
+
+      // ── Apps category + FindingMyFood injection ──────────────────
+      var injectApps;
+      (function() {
+        injectApps = function() {
+          if (document.querySelector('[data-golana="apps-section"]')) return true;
+
+          // Use #time section as template — it has standard tool cards (no custom game UI)
+          var templateSection = document.getElementById('time');
+          if (!templateSection) return false;
+
+          // Need at least one real tool card anchor to clone from
+          var templateCard = templateSection.querySelector('a[href]');
+          if (!templateCard) return false;
+
+          // Also need the Games button to anchor next to
+          var gamesBtn = document.querySelector('a[href="#games"]');
+          if (!gamesBtn) return false;
+
+          var gamesSection = document.getElementById('games');
+          if (!gamesSection) return false;
+
+          // ── 1. Apps nav button — clone Games button, change label ──
+          var appsBtn = gamesBtn.cloneNode(true);
+          appsBtn.setAttribute('href', '#apps');
+          // Walk text nodes and replace "Games" with "Apps", swap emoji
+          (function replaceText(node) {
+            if (node.nodeType === 3) {
+              node.textContent = node.textContent.replace('Games', 'Apps').replace('🎮', '📱');
+            } else {
+              node.childNodes.forEach(replaceText);
+            }
+          })(appsBtn);
+          appsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var sec = document.getElementById('apps');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+          });
+          gamesBtn.parentNode.insertBefore(appsBtn, gamesBtn.nextSibling);
+
+          // ── 2. Clone the #time section shell for Apps ─────────────
+          var appsSection = templateSection.cloneNode(true);
+          appsSection.id = 'apps';
+
+          // Update section title
+          var heading = appsSection.querySelector('h2, h3');
+          if (heading) heading.textContent = '📱 Apps';
+
+          // Update description
+          var desc = appsSection.querySelector('p');
+          if (desc) desc.textContent = 'Full interactive apps that run right in your browser.';
+
+          // ── 3. Build FindingMyFood card from scratch with exact classes ──
+          // Card outer class copied verbatim from the compiled bundle
+          var cardClass = templateCard.className || 'group flex flex-col p-5 bg-card border rounded-xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200';
+
+          // Icon wrapper class — also from the bundle
+          var iconWrapClass = 'p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors';
+
+          // Peek at the real inner row to capture its class too
+          var innerRow = templateCard.querySelector('div');
+          var rowClass = innerRow ? innerRow.className : 'flex items-center gap-3 mb-2';
+
+          // Peek at the real name span class
+          var nameSpan = templateCard.querySelector('span');
+          var nameClass = nameSpan ? nameSpan.className : 'font-semibold text-foreground';
+
+          // Utensils SVG (Lucide-style, matches w-5 h-5 sizing)
+          var utensilsSVG = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>';
+
+          var foodCard = document.createElement('a');
+          foodCard.href = '/food-finder/';
+          foodCard.className = cardClass;
+          foodCard.innerHTML =
+            '<div class="' + rowClass + '">' +
+              '<div class="' + iconWrapClass + '">' + utensilsSVG + '</div>' +
+              '<span class="' + nameClass + '">FindingMyFood</span>' +
+            '</div>';
+
+          // ── 4. Clear the cloned grid and add only our card ────────
+          var grid = appsSection.querySelector('[class*="grid"]');
+          if (grid) {
+            grid.innerHTML = '';
+            grid.appendChild(foodCard);
+          }
+
+          // Insert Apps section after Games
+          appsSection.setAttribute('data-golana', 'apps-section');
+          gamesSection.parentNode.insertBefore(appsSection, gamesSection.nextSibling);
+          return true;
+        };
+
+        var obs = new MutationObserver(function() { if (injectApps()) obs.disconnect(); });
+        document.addEventListener('DOMContentLoaded', function() {
+          obs.observe(document.body, { childList: true, subtree: true });
+          setTimeout(function() { injectApps(); obs.disconnect(); }, 3000);
+        });
+      })();
+
+      // ── Tool search bar ───────────────────────────────────────────
+      var injectSearch;
+      (function() {
+
+        // ── Tool index: name, route, and keyword tags ──────────────
+        var TOOLS = [
+          // PDF
+          { name:'PDF Merger',            route:'/pdf/merger',          tags:'pdf merge combine join files documents' },
+          { name:'PDF Splitter',           route:'/pdf/splitter',        tags:'pdf split separate pages extract divide' },
+          { name:'PDF Compressor',         route:'/pdf/compressor',      tags:'pdf compress reduce shrink size optimize' },
+          { name:'PDF to Image',           route:'/pdf/to-img',          tags:'pdf convert image png jpg picture photo extract' },
+          { name:'PDF to Word (DOCX)',      route:'/pdf/to-docx',         tags:'pdf convert word docx document microsoft office editable' },
+          { name:'Image to PDF',           route:'/pdf/img-to-pdf',      tags:'image photo png jpg jpeg convert pdf scan' },
+          { name:'Word to PDF',            route:'/pdf/docx-to-pdf',     tags:'word docx convert pdf microsoft office document' },
+          { name:'Text to PDF',            route:'/pdf/txt-to-pdf',      tags:'text txt plain convert pdf simple' },
+          // Media
+          { name:'Image Compressor',       route:'/media/img-compressor',tags:'image photo compress reduce size optimize jpg png webp' },
+          { name:'Image Converter',        route:'/media/img-converter', tags:'image convert format jpg png webp gif bmp avif transform' },
+          { name:'Audio Cutter',           route:'/media/audio-cutter',  tags:'audio music cut trim clip mp3 wav sound edit' },
+          { name:'Video Compressor',       route:'/media/video-compressor',tags:'video compress reduce size mp4 file shrink' },
+          { name:'Video to MP3',           route:'/media/video-to-mp3',  tags:'video extract audio mp3 convert music sound mp4 youtube' },
+          // Calculators
+          { name:'Mortgage Calculator',    route:'/calc/mortgage',       tags:'mortgage house home loan payment monthly interest rate buy real estate' },
+          { name:'Loan Calculator',        route:'/calc/loan',           tags:'loan payment borrow calculate interest monthly personal auto' },
+          { name:'Currency Converter',     route:'/calc/currency',       tags:'currency convert exchange rate money dollar euro pound yen usd' },
+          { name:'Percentage Calculator',  route:'/calc/percentage',     tags:'percentage percent calculate ratio discount tip off sale' },
+          { name:'ROI Calculator',         route:'/calc/roi',            tags:'roi return investment profit business finance performance' },
+          { name:'Salary Calculator',      route:'/calc/salary',         tags:'salary wage income tax net gross pay calculate take home paycheck' },
+          { name:'Savings Calculator',     route:'/calc/savings',        tags:'savings save money interest compound future value retirement goal' },
+          { name:'Interest Calculator',    route:'/calc/interest',       tags:'interest rate simple compound calculate money bank loan' },
+          // Everyday tools
+          { name:'QR Code Generator',      route:'/tools/qr',            tags:'qr code generate scan barcode url link wifi contact' },
+          { name:'Password Generator',     route:'/tools/password',      tags:'password generate secure random strong safe login' },
+          { name:'Word Counter',           route:'/tools/wordcount',     tags:'word count characters text length essay writing check' },
+          { name:'Text Case Converter',    route:'/tools/textcase',      tags:'text case upper lower camel title sentence convert format' },
+          { name:'Unit Converter',         route:'/tools/unit',          tags:'unit convert length weight temperature volume meters feet km miles celsius fahrenheit kg lbs' },
+          { name:'Age Calculator',         route:'/tools/age',           tags:'age calculate birthday born how old years difference' },
+          { name:'BMI Calculator',         route:'/tools/bmi',           tags:'bmi body mass index weight height health obesity overweight' },
+          { name:'Date Difference',        route:'/tools/datediff',      tags:'date difference days between calculate calendar how many days' },
+          { name:'Random Generator',       route:'/tools/random',        tags:'random number generate dice roll pick lottery chance' },
+          { name:'Cooking Converter',      route:'/tools/cooking',       tags:'cooking recipe convert cups tablespoon grams ounces teaspoon kitchen measure' },
+          { name:'Timer',                  route:'/tools/timer',         tags:'timer countdown minutes seconds kitchen oven alarm interval' },
+          // AI
+          { name:'AI Summarizer',          route:'/ai/summarizer',       tags:'ai summarize text shorten summary article paragraph tldr condense' },
+          { name:'AI Paraphraser',         route:'/ai/paraphraser',      tags:'ai paraphrase rewrite rephrase text words different way' },
+          { name:'AI Story Generator',     route:'/ai/story',            tags:'ai story write generate creative fiction tale short' },
+          { name:'AI Resume Builder',      route:'/ai/resume',           tags:'ai resume cv write job career professional linkedin' },
+          { name:'AI Name Generator',      route:'/ai/namegen',          tags:'ai name generate brand business baby pet ideas creative' },
+          { name:'AI Jokes Generator',     route:'/ai/jokes',            tags:'ai jokes funny humor comedy generate laugh' },
+          // Developer
+          { name:'JSON Formatter',         route:'/dev/json',            tags:'json format validate beautify minify parse developer api data' },
+          { name:'Code Diff Viewer',       route:'/dev/diff',            tags:'diff compare code text difference changes git compare files' },
+          { name:'Base64 Encoder',         route:'/dev/base64',          tags:'base64 encode decode convert text binary data' },
+          { name:'Color Picker',           route:'/dev/color',           tags:'color picker hex rgb css palette hsl hsv design' },
+          { name:'Code Minifier',          route:'/dev/minifier',        tags:'minify compress code css javascript js html size optimize' },
+          { name:'Regex Tester',           route:'/dev/regex',           tags:'regex regexp regular expression test match pattern validate' },
+          // Time
+          { name:'World Clock',            route:'/time/worldclock',     tags:'world clock time zone city international country utc gmt timezone' },
+          { name:'Countdown Timer',        route:'/time/countdown',      tags:'countdown timer event deadline date celebrate new year' },
+          { name:'Stopwatch',              route:'/time/stopwatch',      tags:'stopwatch timer lap measure time seconds minutes sport running' },
+          // Games
+          { name:'Tic Tac Toe',            route:'/games/ttt',           tags:'tic tac toe game play fun xo noughts crosses board two player' },
+          { name:'Number Guessing Game',   route:'/games/numguess',      tags:'number guess game play fun random puzzle brain' },
+          // Apps
+          { name:'FindingMyFood',          route:'/food-finder/',        tags:'food finder restaurant eat meal spin roulette nearby location discover dinner lunch' },
+        ];
+
+        // ── Fuzzy scorer ───────────────────────────────────────────
+        function score(tool, query) {
+          var words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+          if (!words.length) return 0;
+          var haystack = (tool.name + ' ' + tool.tags).toLowerCase();
+          var nameLow  = tool.name.toLowerCase();
+          var pts = 0;
+          words.forEach(function(w) {
+            if (nameLow === w)                   pts += 60;
+            else if (nameLow.startsWith(w))      pts += 40;
+            else if (nameLow.includes(w))        pts += 25;
+            // whole-word hit in tags
+            var wbRe = new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b');
+            if (wbRe.test(haystack))             pts += 20;
+            else if (haystack.includes(w))       pts += 8;
+          });
+          return pts;
+        }
+
+        function search(query) {
+          return TOOLS
+            .map(function(t) { return { tool: t, pts: score(t, query) }; })
+            .filter(function(x) { return x.pts > 0; })
+            .sort(function(a, b) { return b.pts - a.pts; })
+            .slice(0, 5)
+            .map(function(x) { return x.tool; });
+        }
+
+        // ── Navigate (SPA-aware) ────────────────────────────────────
+        function navigate(route) {
+          // Use React Router's history so the page transition is smooth
+          window.history.pushState(null, '', route);
+          window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
+          window.scrollTo(0, 0);
+        }
+
+        // ── Inject the search bar ───────────────────────────────────
+        injectSearch = function() {
+          if (document.getElementById('golana-search-wrap')) return true;
+
+          // Wait for the category nav buttons (e.g. "PDF Tools") to render
+          var firstCatLink = document.querySelector('a[href="#pdf"]');
+          if (!firstCatLink) return false;
+
+          // Walk up to find the flex-wrap row that holds all category pills
+          var catRow = firstCatLink.parentElement;
+          while (catRow && !catRow.querySelector('a[href="#media"]')) {
+            catRow = catRow.parentElement;
+          }
+          if (!catRow) return false;
+
+          // ── Styles ──────────────────────────────────────────────
+          var style = document.createElement('style');
+          style.textContent = [
+            '#golana-search-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:560px;margin:0 auto 8px}',
+            '#golana-search-row{display:flex;width:100%;gap:8px}',
+            '#golana-search-input{flex:1;padding:11px 16px;border:2px solid #e2e8f0;border-radius:10px;font-family:Inter,sans-serif;font-size:15px;color:#1e293b;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}',
+            '#golana-search-input::placeholder{color:#b0b8c8;font-weight:400}',
+            '#golana-search-input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.13)}',
+            '#golana-search-btn{padding:11px 20px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-family:Inter,sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap}',
+            '#golana-search-btn:hover{background:#1d4ed8}',
+            '#golana-search-btn:active{transform:scale(.97)}',
+            '#golana-results{width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.10);overflow:hidden;animation:gsIn .15s ease}',
+            '@keyframes gsIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}',
+            '.gs-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .1s}',
+            '.gs-item:last-child{border-bottom:none}',
+            '.gs-item:hover{background:#f8fafc}',
+            '.gs-item-name{font-size:14px;font-weight:600;color:#1e293b}',
+            '.gs-item-cat{font-size:12px;color:#94a3b8;margin-top:1px}',
+            '.gs-item-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center}',
+            '#golana-no-result{padding:14px 16px;font-size:14px;color:#94a3b8;text-align:center}',
+          ].join('');
+          document.head.appendChild(style);
+
+          // ── DOM ──────────────────────────────────────────────────
+          var wrap = document.createElement('div');
+          wrap.id = 'golana-search-wrap';
+
+          var row = document.createElement('div');
+          row.id = 'golana-search-row';
+
+          var input = document.createElement('input');
+          input.id          = 'golana-search-input';
+          input.type        = 'search';
+          input.autocomplete = 'off';
+          input.placeholder = 'Type here what you are looking for…';
+          input.setAttribute('aria-label', 'Search tools');
+
+          var btn = document.createElement('button');
+          btn.id = 'golana-search-btn';
+          btn.textContent = '🔍 Search';
+
+          row.appendChild(input);
+          row.appendChild(btn);
+          wrap.appendChild(row);
+          catRow.parentNode.insertBefore(wrap, catRow);
+
+          // ── Results dropdown ─────────────────────────────────────
+          var CAT_LABELS = {
+            '/pdf/':'📄 PDF', '/media/':'🖼️ Media', '/calc/':'💰 Calculators',
+            '/tools/':'🛠️ Utilities', '/ai/':'🤖 AI Tools', '/dev/':'</> Developer',
+            '/time/':'🕐 Time', '/games/':'🎮 Games', '/food-finder/':'📱 Apps',
+          };
+          function catLabel(route) {
+            for (var k in CAT_LABELS) { if (route.startsWith(k)) return CAT_LABELS[k]; }
+            return '🔧 Tool';
+          }
+          function catIcon(route) {
+            var icons = { '/pdf/':'📄','/media/':'🖼️','/calc/':'💰','/tools/':'🛠️',
+                          '/ai/':'🤖','/dev/':'💻','/time/':'🕐','/games/':'🎮','/food-finder/':'🍽️' };
+            for (var k in icons) { if (route.startsWith(k)) return icons[k]; }
+            return '🔧';
+          }
+
+          var resultsEl = null;
+
+          function hideResults() {
+            if (resultsEl) { resultsEl.remove(); resultsEl = null; }
+          }
+
+          function showResults(results) {
+            hideResults();
+            resultsEl = document.createElement('div');
+            resultsEl.id = 'golana-results';
+            if (!results.length) {
+              var none = document.createElement('div');
+              none.id = 'golana-no-result';
+              none.textContent = 'No tools found — try different keywords.';
+              resultsEl.appendChild(none);
+            } else {
+              results.forEach(function(tool) {
+                var item = document.createElement('div');
+                item.className = 'gs-item';
+                item.innerHTML =
+                  '<div class="gs-item-icon">' + catIcon(tool.route) + '</div>' +
+                  '<div><div class="gs-item-name">' + tool.name + '</div>' +
+                       '<div class="gs-item-cat">' + catLabel(tool.route) + '</div></div>';
+                item.addEventListener('mousedown', function(e) {
+                  e.preventDefault(); // prevent input blur before click fires
+                  navigate(tool.route);
+                  input.value = tool.name;
+                  hideResults();
+                });
+                resultsEl.appendChild(item);
+              });
+            }
+            wrap.appendChild(resultsEl);
+          }
+
+          // ── Events ───────────────────────────────────────────────
+          function runSearch() {
+            var q = input.value.trim();
+            if (!q) { hideResults(); return; }
+            var results = search(q);
+            if (results.length === 1) {
+              // Single match — go straight there
+              navigate(results[0].route);
+              input.value = results[0].name;
+              hideResults();
+            } else {
+              showResults(results);
+            }
+          }
+
+          btn.addEventListener('click', runSearch);
+
+          input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { runSearch(); return; }
+            if (e.key === 'Escape') { hideResults(); return; }
+          });
+
+          // Live suggestions while typing (after 2+ characters)
+          input.addEventListener('input', function() {
+            var q = input.value.trim();
+            if (q.length < 2) { hideResults(); return; }
+            showResults(search(q));
+          });
+
+          // Close on outside click
+          document.addEventListener('click', function(e) {
+            if (!wrap.contains(e.target)) hideResults();
+          });
+
+          return true;
+        };
+
+        var obs = new MutationObserver(function() { if (injectSearch()) obs.disconnect(); });
+        document.addEventListener('DOMContentLoaded', function() {
+          obs.observe(document.body, { childList: true, subtree: true });
+          setTimeout(function() { injectSearch(); obs.disconnect(); }, 3000);
+        });
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 5b · LOGO SWAP — replace the React-rendered navbar logo img
+      // with our favicon.png on every navigation.
+      // ══════════════════════════════════════════════════════════════
+      function injectLogo() {
+        var header = document.querySelector('header');
+        if (!header) return false;
+        // The React app renders a logo <img> inside a link in the header
+        var logoImg = header.querySelector('a img, img');
+        if (!logoImg) return false;
+        if (logoImg.getAttribute('data-golana-logo')) return true; // already swapped
+        logoImg.src = '/favicon.png';
+        logoImg.setAttribute('data-golana-logo', '1');
+        // Keep it square and crisp at the same size the original used
+        logoImg.style.cssText += ';width:32px;height:32px;object-fit:contain;border-radius:6px;';
+        return true;
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 6 · RUN ALL INJECTIONS (called after every SPA navigation)
+      // Retries up to 15× at 150 ms intervals until all injections land.
+      // ══════════════════════════════════════════════════════════════
+      function runAllInjections(attempt) {
+        attempt = attempt || 0;
+        var done = true;
+        done = injectHamburger() && done;
+        done = injectLogo()      && done;
+        if (injectSearch) done = (injectSearch() !== false) && done;
+        if (injectApps)   done = (injectApps()   !== false) && done;
+        if (!done && attempt < 15) {
+          setTimeout(function() { runAllInjections(attempt + 1); }, 150);
+        }
+      }
+
+      // ── Initial-load trigger — run all injections on first page load ──
+      // scheduleReinjection only fires on SPA nav; this covers direct URL
+      // loads and hard refreshes (React needs ~200 ms to render the header).
+      (function() {
+        function kickstart() { runAllInjections(); }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(kickstart, 200);
+          });
+        } else {
+          setTimeout(kickstart, 200);
+        }
+      })();
+
+      // ── Collapse empty / failed ad slots ─────────────────────────
+      // CSS already handles data-ad-status="unfilled/error" cases.
+      // This JS handles the case where adsbygoogle.js never runs at all
+      // (blocked / 400 error) so data-ad-status is never set.
+      function collapseEmptyAds() {
+        document.querySelectorAll('ins.adsbygoogle').forEach(function(ins) {
+          if (ins.getAttribute('data-ad-status') !== 'filled') {
+            ins.style.cssText += ';display:none!important;height:0!important;min-height:0!important;';
+            var p1 = ins.parentElement;
+            if (p1) {
+              p1.style.cssText += ';min-height:0!important;height:0!important;';
+              var p2 = p1.parentElement;
+              if (p2 && !p2.id && p2 !== document.body) {
+                p2.style.cssText += ';margin-bottom:0!important;padding-bottom:0!important;';
+              }
+            }
+          }
+        });
+      }
+      // Run once after a delay — no MutationObserver to avoid feedback loops
+      setTimeout(collapseEmptyAds, 1500);
+    })();
+  </script>
   </body>
 </html>

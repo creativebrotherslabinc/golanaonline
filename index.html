@@ -607,6 +607,20 @@
         }
       }
 
+      // ── Initial-load trigger — run all injections on first page load ──
+      // scheduleReinjection only fires on SPA nav; this covers direct URL
+      // loads and hard refreshes (React needs ~200 ms to render the header).
+      (function() {
+        function kickstart() { runAllInjections(); }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(kickstart, 200);
+          });
+        } else {
+          setTimeout(kickstart, 200);
+        }
+      })();
+
       // ── Collapse empty / failed ad slots ─────────────────────────
       // CSS already handles data-ad-status="unfilled/error" cases.
       // This JS handles the case where adsbygoogle.js never runs at all
