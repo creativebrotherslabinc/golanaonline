@@ -511,9 +511,14 @@ function clientFilter(pool, prefs) {
     if (prefs.cuisines.length > 0 && !prefs.cuisines.some(c => cuisineMatches(r, c))) return false;
     if (prefs.dinings.length  > 0 && !prefs.dinings.some(d => diningMatches(r, d)))   return false;
     if (prefs.openNow && r.openStatus !== null && r.openStatus.isOpen === false)       return false;
-    if (prefs.kidsOnly && !r.kidsMenu)                                                 return false;
+    // kidsOnly toggle OR "Family" group size → require kids-friendly tag
+    if ((prefs.kidsOnly || prefs.groups.includes('family')) && !r.kidsMenu)            return false;
     const minR = parseFloat(prefs.minRating) || 0;
     if (minR > 0 && r.starRating !== null && r.starRating < minR)                     return false;
+    // Price range — best-effort using OSM stars/rating as a proxy for price tier
+    // (empty = any price; some selected = only restaurants whose tier overlaps)
+    if (prefs.prices.length > 0 && r.priceLevel !== null &&
+        !prefs.prices.map(Number).includes(r.priceLevel))                              return false;
     return true;
   });
 }
@@ -625,10 +630,18 @@ async function fetchRestaurants() {
     else filtered.sort((a, b) => (b.openStatus?.isOpen ? 1 : 0) - (a.openStatus?.isOpen ? 1 : 0));
   }
 
-  // Kids friendly
-  if (state.prefs.kidsOnly) {
+  // Kids friendly — kidsOnly toggle OR "Family" selected in group size
+  const wantsKidsFriendly = state.prefs.kidsOnly || state.prefs.groups.includes('family');
+  if (wantsKidsFriendly) {
     const kids = filtered.filter(r => r.kidsMenu);
     if (kids.length >= 3) filtered = kids;
+  }
+
+  // Price level — apply when OSM price data is available (sparse, best-effort)
+  if (state.prefs.prices.length > 0) {
+    const selectedLevels = state.prefs.prices.map(Number);
+    const priced = filtered.filter(r => r.priceLevel == null || selectedLevels.includes(r.priceLevel));
+    if (priced.length >= 3) filtered = priced;
   }
 
   // Minimum rating
@@ -737,6 +750,7 @@ function parseRestaurants(data) {
       openingHoursRaw: el.tags.opening_hours || null,
       openStatus:      null,
       starRating:      parseStarRating(el.tags),
+      priceLevel:      parsePriceLevel(el.tags),
       kidsMenu:        kidsTag(el.tags),
       score:           scoreRestaurant(el.tags),
     });
@@ -786,6 +800,20 @@ function parseStarRating(tags) {
   const n = parseFloat(String(raw).replace(',', '.'));
   if (isNaN(n) || n < 1 || n > 5) return null;
   return Math.round(n * 10) / 10;
+}
+
+// Price level (1–4) from OSM tags.
+// OSM has no standard $/$$/$$$/$$$$ tag; we check the rare `price_range` tag
+// and fall back to null when data is absent (most restaurants have no data).
+function parsePriceLevel(tags) {
+  const raw = tags.price_range || tags['price:range'] || tags['fee:amount'];
+  if (!raw) return null;
+  // Count $ signs (e.g. "$$" → 2), or parse a bare integer 1-4
+  const dollars = (String(raw).match(/\$/g) || []).length;
+  if (dollars >= 1 && dollars <= 4) return dollars;
+  const n = parseInt(raw, 10);
+  if (!isNaN(n) && n >= 1 && n <= 4) return n;
+  return null;
 }
 
 function renderStars(rating) {
