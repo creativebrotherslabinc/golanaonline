@@ -232,9 +232,10 @@
       }
 
       // ── Apps category + FindingMyFood injection ──────────────────
+      var injectApps;
       (function() {
-        function inject() {
-          if (document.getElementById('__apps-injected')) return true;
+        injectApps = function() {
+          if (document.querySelector('[data-golana="apps-section"]')) return true;
 
           // Use #time section as template — it has standard tool cards (no custom game UI)
           var templateSection = document.getElementById('time');
@@ -316,23 +317,20 @@
           }
 
           // Insert Apps section after Games
+          appsSection.setAttribute('data-golana', 'apps-section');
           gamesSection.parentNode.insertBefore(appsSection, gamesSection.nextSibling);
-
-          // Mark done
-          var m = document.createElement('meta');
-          m.id = '__apps-injected';
-          document.head.appendChild(m);
           return true;
-        }
+        };
 
-        var obs = new MutationObserver(function() { if (inject()) obs.disconnect(); });
+        var obs = new MutationObserver(function() { if (injectApps()) obs.disconnect(); });
         document.addEventListener('DOMContentLoaded', function() {
           obs.observe(document.body, { childList: true, subtree: true });
-          setTimeout(function() { inject(); obs.disconnect(); }, 3000);
+          setTimeout(function() { injectApps(); obs.disconnect(); }, 3000);
         });
       })();
 
       // ── Tool search bar ───────────────────────────────────────────
+      var injectSearch;
       (function() {
 
         // ── Tool index: name, route, and keyword tags ──────────────
@@ -435,8 +433,8 @@
         }
 
         // ── Inject the search bar ───────────────────────────────────
-        function inject() {
-          if (document.getElementById('__search-injected')) return true;
+        injectSearch = function() {
+          if (document.getElementById('golana-search-wrap')) return true;
 
           // Wait for the category nav buttons (e.g. "PDF Tools") to render
           var firstCatLink = document.querySelector('a[href="#pdf"]');
@@ -581,19 +579,31 @@
             if (!wrap.contains(e.target)) hideResults();
           });
 
-          // ── Done ─────────────────────────────────────────────────
-          var m = document.createElement('meta');
-          m.id = '__search-injected';
-          document.head.appendChild(m);
           return true;
-        }
+        };
 
-        var obs = new MutationObserver(function() { if (inject()) obs.disconnect(); });
+        var obs = new MutationObserver(function() { if (injectSearch()) obs.disconnect(); });
         document.addEventListener('DOMContentLoaded', function() {
           obs.observe(document.body, { childList: true, subtree: true });
-          setTimeout(function() { inject(); obs.disconnect(); }, 3000);
+          setTimeout(function() { injectSearch(); obs.disconnect(); }, 3000);
         });
       })();
+
+      // ══════════════════════════════════════════════════════════════
+      // 6 · RUN ALL INJECTIONS (called after every SPA navigation)
+      // Retries up to 15× at 150 ms intervals until all injections land.
+      // ══════════════════════════════════════════════════════════════
+      function runAllInjections(attempt) {
+        attempt = attempt || 0;
+        var done = true;
+        done = replaceLogo()    && done;
+        done = injectHamburger() && done;
+        if (injectSearch) done = (injectSearch() !== false) && done;
+        if (injectApps)   done = (injectApps()   !== false) && done;
+        if (!done && attempt < 15) {
+          setTimeout(function() { runAllInjections(attempt + 1); }, 150);
+        }
+      }
 
       // ── Collapse empty / failed ad slots ─────────────────────────
       // CSS already handles data-ad-status="unfilled/error" cases.
