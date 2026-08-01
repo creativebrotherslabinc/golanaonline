@@ -260,13 +260,13 @@ function setGeoDetecting(active) {
   const gpsbtn  = document.getElementById('btn-use-gps');
   if (!spinner) return;
   if (active) {
-    spinner.style.display = '';
-    text.style.display    = '';
+    spinner.style.display = 'flex';
+    text.style.display    = 'inline';
     gpsbtn.style.display  = 'none';
   } else {
     spinner.style.display = 'none';
     text.style.display    = 'none';
-    gpsbtn.style.display  = '';
+    gpsbtn.style.display  = 'block';
   }
 }
 
@@ -293,14 +293,12 @@ function onGeoError(err) {
   _clearGeoTimer();
   setGeoDetecting(false);
   const msgs = {
-    1: 'Location access was denied. Tap "Use My Location" to try again, or enter your location below.',
-    2: 'Your location could not be determined. Enter it manually below.',
-    3: 'Location request timed out. Tap "Use My Location" to retry, or enter your location below.',
+    1: 'Permission denied — tap "Use My Location" to try again, or type below:',
+    2: 'Could not detect location. Type your city or postal code:',
+    3: 'Location timed out — tap "Use My Location" to retry, or type below:',
   };
-  const manual = document.getElementById('location-manual');
-  const denied = manual?.querySelector('.location-denied-msg');
+  const denied = document.getElementById('location-denied-msg');
   if (denied) denied.textContent = msgs[err?.code] || msgs[2];
-  // Show GPS button + manual form so user can retry or type
   showManualLocation(true);
 }
 
@@ -324,11 +322,15 @@ function resetLocation() {
   state.locationLabel = '';
   state.pool = [];
   _geoRequested = false;
+  _clearGeoTimer();
   document.getElementById('location-confirmed').classList.add('hidden');
-  document.getElementById('location-auto').classList.remove('hidden');
-  document.getElementById('location-manual').classList.add('hidden');
   setPoolStatus('');
-  requestGeolocation();
+  // Show GPS button + manual input together — let user pick
+  showManualLocation(true);
+  // Clear any previous manual entry
+  const inp = document.getElementById('manual-location');
+  if (inp) inp.value = '';
+  document.getElementById('geocode-error').classList.add('hidden');
 }
 
 function confirmLocation(label) {
@@ -340,12 +342,22 @@ function confirmLocation(label) {
 }
 
 async function reverseGeocode(lat, lon) {
-  const res = await fetch(`/api/geocode/reverse?lat=${lat}&lon=${lon}`);
+  // Call Nominatim directly — CORS allowed from browsers
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`,
+    { headers: { 'Accept': 'application/json' } }
+  );
   if (!res.ok) throw new Error(`Reverse geocode ${res.status}`);
   const data = await res.json();
   const a = data.address || {};
-  return [a.city || a.town || a.village || a.county || '', a.country || '']
-    .filter(Boolean).join(', ');
+  // Walk from specific to broad until we find a name, fall back to display_name
+  const city = a.city || a.town || a.municipality || a.village || a.suburb
+             || a.county || a.state_district || a.state || '';
+  const country = a.country || '';
+  if (city || country) return [city, country].filter(Boolean).join(', ');
+  // Last resort: first two segments of display_name
+  return (data.display_name || '').split(',').slice(0, 2).join(', ').trim()
+      || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
 }
 
 async function geocodeManualLocation() {
@@ -357,12 +369,22 @@ async function geocodeManualLocation() {
   btn.textContent = '…';
   btn.disabled = true;
   try {
-    const res  = await fetch(`/api/geocode/search?q=${encodeURIComponent(query)}`);
+    // Call Nominatim directly — works from any static host
+    const res  = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(query)}&accept-language=en`,
+      { headers: { 'Accept': 'application/json' } }
+    );
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) throw new Error('Not found');
-    state.lat = parseFloat(data[0].lat);
-    state.lon = parseFloat(data[0].lon);
-    state.locationLabel = data[0].display_name.split(',').slice(0, 3).join(', ');
+    const best = data[0];
+    state.lat = parseFloat(best.lat);
+    state.lon = parseFloat(best.lon);
+    // Build a clean label: city + country from address fields when available
+    const a = best.address || {};
+    const city    = a.city || a.town || a.municipality || a.village || a.county || '';
+    const country = a.country || '';
+    state.locationLabel = [city, country].filter(Boolean).join(', ')
+                       || best.display_name.split(',').slice(0, 3).join(', ');
     confirmLocation(state.locationLabel);
   } catch {
     errEl.classList.remove('hidden');
@@ -654,14 +676,15 @@ function buildOverpassQuery(cuisines, radius) {
 }
 
 async function runOverpassQuery(query, signal) {
+  // Call Overpass directly — works from any static host (CORS allowed)
   const opts = {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ query }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    'data=' + encodeURIComponent(query),
   };
   if (signal) opts.signal = signal;
-  const res = await fetch('/api/overpass', opts);
-  if (!res.ok) throw new Error(`Overpass proxy ${res.status}`);
+  const res = await fetch('https://overpass-api.de/api/interpreter', opts);
+  if (!res.ok) throw new Error(`Overpass ${res.status}`);
   return res.json();
 }
 

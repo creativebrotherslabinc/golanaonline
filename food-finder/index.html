@@ -83,9 +83,11 @@
             </button>
           </div>
           <div id="location-manual" class="location-manual hidden">
-            <p class="location-denied-msg">Enter your city or postal code:</p>
+            <p id="location-denied-msg" class="location-denied-msg">Or type your city, address, or postal code:</p>
             <div class="input-row">
-              <input type="text" id="manual-location" class="text-input" placeholder="e.g. Tokyo, Japan · Paris, France · 10001 US" />
+              <input type="text" id="manual-location" class="text-input"
+                     placeholder="e.g. Tokyo, Japan · Paris, France · 10001 US"
+                     autocomplete="off" inputmode="search" />
               <button id="btn-geocode" class="btn-secondary">Search</button>
             </div>
             <p id="geocode-error" class="field-error hidden">Location not found. Try adding the country name — e.g. "10001 US" or "Paris, France".</p>
