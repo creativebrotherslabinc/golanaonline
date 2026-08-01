@@ -144,8 +144,9 @@
           // Find the inner flex container (has h-16 and flex items-center)
           var innerContainer = header.querySelector('div[class*="h-16"]') || header;
 
-          // Hide React nav
+          // Hide React nav and its own mobile hamburger button
           reactNav.style.display = 'none';
+          header.querySelectorAll('button').forEach(function(b) { b.style.display = 'none'; });
 
           // Build wrapper → button + dropdown
           var wrap = document.createElement('div');
