@@ -12,7 +12,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Go LANA – Free Online Tools | golana.online" />
     <meta name="twitter:description" content="Go LANA – Library of All Needed Apps. Free online tools at golana.online"/>
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png?v=2" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,12 +64,12 @@
         function enforcePng() {
           var hasPng = false;
           document.head.querySelectorAll('link[rel*="icon"]').forEach(function(l) {
-            if (l.getAttribute('href') === '/favicon.png') { hasPng = true; return; }
+            if (l.getAttribute('href') === '/favicon.png?v=2') { hasPng = true; return; }
             l.parentNode.removeChild(l); // remove SVG or other icon links
           });
           if (!hasPng) {
             var lnk = document.createElement('link');
-            lnk.rel = 'icon'; lnk.type = 'image/png'; lnk.href = '/favicon.png';
+            lnk.rel = 'icon'; lnk.type = 'image/png'; lnk.href = '/favicon.png?v=2';
             document.head.appendChild(lnk);
           }
         }
@@ -584,7 +584,7 @@
         var logoImg = header.querySelector('a img, img');
         if (!logoImg) return false;
         if (logoImg.getAttribute('data-golana-logo')) return true; // already swapped
-        logoImg.src = '/favicon.png';
+        logoImg.src = '/favicon.png?v=2';
         logoImg.setAttribute('data-golana-logo', '1');
         // Keep it square and crisp at the same size the original used
         logoImg.style.cssText += ';width:32px;height:32px;object-fit:contain;border-radius:6px;';
