@@ -121,23 +121,7 @@
       }
 
       // ══════════════════════════════════════════════════════════════
-      // 4 · LOGO REPLACEMENT
-      // Guard: DOM presence — header anchor already has an <img>
-      // ══════════════════════════════════════════════════════════════
-      function replaceLogo() {
-        if (document.querySelector('header a img.__golana-logo')) return true;
-        var svg = document.querySelector('header a svg.w-5, header a svg[class*="w-5"]');
-        if (!svg) return false;
-        var img = document.createElement('img');
-        img.src = '/favicon.png';
-        img.className = '__golana-logo';
-        img.style.cssText = 'width:20px;height:20px;object-fit:cover;border-radius:2px;display:block';
-        svg.parentNode.replaceChild(img, svg);
-        return true;
-      }
-
-      // ══════════════════════════════════════════════════════════════
-      // 5 · HAMBURGER NAV
+      // 4 · HAMBURGER NAV
       // Guard: DOM presence — .golana-wrap element
       // Styles injected only once via JS flag.
       // ══════════════════════════════════════════════════════════════
@@ -596,7 +580,6 @@
       function runAllInjections(attempt) {
         attempt = attempt || 0;
         var done = true;
-        done = replaceLogo()    && done;
         done = injectHamburger() && done;
         if (injectSearch) done = (injectSearch() !== false) && done;
         if (injectApps)   done = (injectApps()   !== false) && done;
