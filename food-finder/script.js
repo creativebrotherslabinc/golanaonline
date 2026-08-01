@@ -173,6 +173,17 @@ function handleMultiClick(btn, group) {
   updateFacets();
 }
 
+// ── Brewery Bypass Notice ──────────────────────────────────────────────────
+
+function updateBreweryBypassNotice() {
+  const notice  = document.getElementById('brewery-bypass-notice');
+  const card    = document.getElementById('cuisine-card');
+  if (!notice || !card) return;
+  const active = state.prefs.breweryMode;
+  notice.classList.toggle('hidden', !active);
+  card.classList.toggle('cuisine-bypassed', active);
+}
+
 // ── Toggle Helper ──────────────────────────────────────────────────────────
 
 function setupToggle(id, prefKey, onChange) {
@@ -220,7 +231,10 @@ function setupEventListeners() {
   setupToggle('btn-open-now',  'openNow',     updateFacets);
   setupToggle('btn-kids',      'kidsOnly',    updateFacets);
   setupToggle('btn-pub',       'pubMode',     fetchPool);   // changing pub mode changes pool type
-  setupToggle('btn-brewery',   'breweryMode', fetchPool);
+  setupToggle('btn-brewery',   'breweryMode', () => {
+    updateBreweryBypassNotice();
+    fetchPool();
+  });
 }
 
 // ── Geolocation ────────────────────────────────────────────────────────────
@@ -453,10 +467,15 @@ function buildPoolQuery(radius) {
   const lines  = [];
 
   if (state.prefs.breweryMode) {
+    // Dedicated breweries
     lines.push(`  node["craft"="brewery"]${around};`);
     lines.push(`  way["craft"="brewery"]${around};`);
-    lines.push(`  node["amenity"="pub"]["microbrewery"="yes"]${around};`);
-    lines.push(`  way["amenity"="pub"]["microbrewery"="yes"]${around};`);
+    // Any venue that brews its own beer (microbrewery tag on any amenity type)
+    lines.push(`  node["microbrewery"="yes"]${around};`);
+    lines.push(`  way["microbrewery"="yes"]${around};`);
+    // Pubs / restaurants with real / local ale on tap
+    lines.push(`  node["real_ale"="yes"]${around};`);
+    lines.push(`  way["real_ale"="yes"]${around};`);
   } else if (state.prefs.pubMode) {
     for (const a of ['pub', 'bar']) {
       lines.push(`  node["amenity"="${a}"]${around};`);
@@ -481,16 +500,23 @@ function updateFacets() {
   if (!state.pool.length || state.poolLoading) return;
 
   // ── Cuisine facets ──
-  // Base: pool filtered by everything except cuisines
-  const baseForCuisine = clientFilter(state.pool, { ...state.prefs, cuisines: [] });
-  document.querySelectorAll('.option-btn[data-group="cuisines"]').forEach(btn => {
-    const v = btn.dataset.value;
-    if (v === 'any' || state.prefs.cuisines.includes(v)) {
-      btn.classList.remove('dim-facet'); return;
-    }
-    const has = baseForCuisine.some(r => cuisineMatches(r, v));
-    btn.classList.toggle('dim-facet', !has);
-  });
+  if (state.prefs.breweryMode) {
+    // Cuisine is fully bypassed in brewery mode — dim all chips to signal this
+    document.querySelectorAll('.option-btn[data-group="cuisines"]').forEach(btn => {
+      btn.classList.add('dim-facet');
+    });
+  } else {
+    // Base: pool filtered by everything except cuisines
+    const baseForCuisine = clientFilter(state.pool, { ...state.prefs, cuisines: [] });
+    document.querySelectorAll('.option-btn[data-group="cuisines"]').forEach(btn => {
+      const v = btn.dataset.value;
+      if (v === 'any' || state.prefs.cuisines.includes(v)) {
+        btn.classList.remove('dim-facet'); return;
+      }
+      const has = baseForCuisine.some(r => cuisineMatches(r, v));
+      btn.classList.toggle('dim-facet', !has);
+    });
+  }
 
   // ── Dining facets ──
   // Base: pool filtered by everything except dinings
@@ -598,20 +624,26 @@ async function fetchRestaurants() {
   const wheelSize = parseInt(state.prefs.wheelSize) || 10;
   const minRating = parseFloat(state.prefs.minRating) || 0;
 
+  // Brewery mode bypasses cuisine entirely — the Overpass query targets
+  // brewery/microbrewery/real_ale tags regardless of cuisine selection.
+  const cuisines = state.prefs.breweryMode ? [] : state.prefs.cuisines;
+
   // 1. Primary search with all selected filters
-  let results = await runSearch(state.prefs.cuisines, radius);
+  let results = await runSearch(cuisines, radius);
 
-  // 2. No results with cuisine → widen radius (keep cuisine filter)
-  if (results.length === 0 && state.prefs.cuisines.length > 0) {
-    results = await runSearch(state.prefs.cuisines, Math.min(radius * 2, 20000));
+  if (!state.prefs.breweryMode) {
+    // 2. No results with cuisine → widen radius (keep cuisine filter)
+    if (results.length === 0 && cuisines.length > 0) {
+      results = await runSearch(cuisines, Math.min(radius * 2, 20000));
+    }
+
+    // 3. Still no results → drop cuisine, try original radius
+    if (results.length === 0 && cuisines.length > 0) {
+      results = await runSearch([], radius);
+    }
   }
 
-  // 3. Still no results → drop cuisine, try original radius
-  if (results.length === 0 && state.prefs.cuisines.length > 0) {
-    results = await runSearch([], radius);
-  }
-
-  // 4. Still nothing → drop cuisine + double radius
+  // 4. Still nothing → widen radius
   if (results.length === 0) {
     results = await runSearch([], Math.min(radius * 2, 20000));
   }
@@ -677,10 +709,17 @@ function buildOverpassQuery(cuisines, radius) {
   const lines = [];
 
   if (state.prefs.breweryMode) {
+    // Cuisine filter is fully bypassed in brewery mode — we search by brewery
+    // tags only, regardless of what cuisine the user may have selected.
+    // Dedicated breweries
     lines.push(`  node["craft"="brewery"]${around};`);
     lines.push(`  way["craft"="brewery"]${around};`);
-    lines.push(`  node["amenity"="pub"]["microbrewery"="yes"]${around};`);
-    lines.push(`  way["amenity"="pub"]["microbrewery"="yes"]${around};`);
+    // Any venue that manufactures its own beer (brew-pub, restaurant-brewery, etc.)
+    lines.push(`  node["microbrewery"="yes"]${around};`);
+    lines.push(`  way["microbrewery"="yes"]${around};`);
+    // Venues serving real / local ale
+    lines.push(`  node["real_ale"="yes"]${around};`);
+    lines.push(`  way["real_ale"="yes"]${around};`);
     if (state.prefs.pubMode) {
       lines.push(`  node["amenity"="pub"]${around};`);
       lines.push(`  way["amenity"="bar"]${around};`);

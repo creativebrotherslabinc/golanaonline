@@ -193,9 +193,10 @@
         </section>
 
         <!-- Cuisine — last filter; options dim based on all other selections above -->
-        <section class="card">
+        <section class="card" id="cuisine-card">
           <h2 class="card-title">🍜 Cuisine <span id="pool-status" class="pool-status"></span></h2>
           <p class="card-hint">Options narrow based on your other filters — or leave on Any</p>
+          <p class="card-hint brewery-bypass-notice hidden" id="brewery-bypass-notice">🍻 Brewery mode active — cuisine filter bypassed. Results show any place that brews or serves local beer.</p>
           <div class="option-grid cuisine-grid">
             <button class="option-btn selected" data-group="cuisines" data-value="any">Any</button>
             <button class="option-btn" data-group="cuisines" data-value="italian">Italian</button>

@@ -337,6 +337,24 @@ body {
   border-style: solid;
 }
 
+/* ─── Brewery bypass notice ──────────────────── */
+.brewery-bypass-notice {
+  background: #fff8ed;
+  border: 1.5px solid #f5a623;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #7a4e0d;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* Dim the whole cuisine grid when brewery mode is active */
+.cuisine-bypassed .cuisine-grid {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 /* ─── Feature Toggles (open now / kids / pub / brewery) */
 .toggles-grid {
   display: grid;
