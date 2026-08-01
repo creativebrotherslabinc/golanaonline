@@ -580,14 +580,13 @@
       function injectLogo() {
         var header = document.querySelector('header');
         if (!header) return false;
-        // The React app renders a logo <img> inside a link in the header
-        var logoImg = header.querySelector('a img, img');
-        if (!logoImg) return false;
-        if (logoImg.getAttribute('data-golana-logo')) return true; // already swapped
-        logoImg.src = '/favicon.png?v=2';
-        logoImg.setAttribute('data-golana-logo', '1');
-        // Keep it square and crisp at the same size the original used
-        logoImg.style.cssText += ';width:32px;height:32px;object-fit:contain;border-radius:6px;';
+        // The React navbar renders a lucide Hammer SVG inside a div.bg-primary
+        // inside the home <a> link — there is no <img> tag. Find that container.
+        var iconWrap = header.querySelector('a div.bg-primary, a div[class*="bg-primary"]');
+        if (!iconWrap) return false;
+        if (iconWrap.getAttribute('data-golana-logo')) return true; // already swapped
+        iconWrap.innerHTML = '<img src="/favicon.png?v=2" style="width:20px;height:20px;object-fit:contain;display:block;" alt="Go LANA" />';
+        iconWrap.setAttribute('data-golana-logo', '1');
         return true;
       }
 
