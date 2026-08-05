@@ -115,15 +115,19 @@ async def proxy_geocode_search(request: Request):
 
 # ── Resume Genie API ──────────────────────────────────────────────────
 
-def _check_groq():
-    if not os.environ.get("GROQ_API_KEY"):
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "GROQ_API_KEY is not configured. "
-                "Add it in the Replit Secrets tab to enable resume generation."
-            ),
-        )
+def _check_provider(provider: str):
+    if provider == "gemini":
+        if not os.environ.get("GEMINI_API_KEY"):
+            raise HTTPException(
+                status_code=503,
+                detail="GEMINI_API_KEY is not configured. Add it in the Replit Secrets tab.",
+            )
+    else:
+        if not os.environ.get("GROQ_API_KEY"):
+            raise HTTPException(
+                status_code=503,
+                detail="GROQ_API_KEY is not configured. Add it in the Replit Secrets tab.",
+            )
 
 
 def _build_file(content: dict, file_type: str):
@@ -135,7 +139,11 @@ def _build_file(content: dict, file_type: str):
 
 @app.get("/resume-genie/api/healthz")
 def rg_health():
-    return {"status": "ok", "groq_configured": bool(os.environ.get("GROQ_API_KEY"))}
+    return {
+        "status": "ok",
+        "groq_configured": bool(os.environ.get("GROQ_API_KEY")),
+        "gemini_configured": bool(os.environ.get("GEMINI_API_KEY")),
+    }
 
 
 @app.post("/resume-genie/api/generate")
@@ -143,12 +151,13 @@ async def rg_generate(
     career_history:  str = Form(...),
     job_description: str = Form(...),
     file_type:       str = Form(default="pdf"),
+    provider:        str = Form(default="groq"),
 ):
-    _check_groq()
+    _check_provider(provider)
     if not career_history.strip() or not job_description.strip():
         raise HTTPException(status_code=400, detail="Both fields are required.")
     try:
-        content = generate_resume_content(career_history, job_description)
+        content = generate_resume_content(career_history, job_description, provider=provider)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {e}")
     try:
@@ -167,8 +176,9 @@ async def rg_generate_multi(
     career_history:   str = Form(...),
     job_descriptions: str = Form(...),
     file_type:        str = Form(default="pdf"),
+    provider:         str = Form(default="groq"),
 ):
-    _check_groq()
+    _check_provider(provider)
     if not career_history.strip():
         raise HTTPException(status_code=400, detail="Career history is required.")
     try:
@@ -185,7 +195,7 @@ async def rg_generate_multi(
     with zipfile.ZipFile(zip_buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         for idx, job_desc in enumerate(descriptions, start=1):
             try:
-                content = generate_resume_content(career_history, job_desc)
+                content = generate_resume_content(career_history, job_desc, provider=provider)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"AI failed for target {idx}: {e}")
             file_bytes, _, ext = _build_file(content, file_type)
