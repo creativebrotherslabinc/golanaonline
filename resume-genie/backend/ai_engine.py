@@ -1,7 +1,8 @@
 import os
 import json
 from groq import Groq
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 _PROMPT_TEMPLATE = """You are an expert resume writer and career strategist. Analyze the user's career history and the target job description, then generate highly optimized resume content.
 
@@ -84,13 +85,16 @@ def _generate_with_groq(career_history: str, job_description: str) -> dict:
 
 
 def _generate_with_gemini(career_history: str, job_description: str) -> dict:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     prompt = _PROMPT_TEMPLATE.format(
         career_history=career_history,
         job_description=job_description,
     )
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=4000),
+    )
     return _parse_json(response.text)
 
 
