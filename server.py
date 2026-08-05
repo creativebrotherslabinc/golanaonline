@@ -116,18 +116,11 @@ async def proxy_geocode_search(request: Request):
 # ── Resume Genie API ──────────────────────────────────────────────────
 
 def _check_provider(provider: str):
-    if provider == "gemini":
-        if not os.environ.get("GEMINI_API_KEY"):
-            raise HTTPException(
-                status_code=503,
-                detail="GEMINI_API_KEY is not configured. Add it in the Replit Secrets tab.",
-            )
-    else:
-        if not os.environ.get("GROQ_API_KEY"):
-            raise HTTPException(
-                status_code=503,
-                detail="GROQ_API_KEY is not configured. Add it in the Replit Secrets tab.",
-            )
+    if not os.environ.get("GROQ_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="GROQ_API_KEY is not configured. Add it in the Replit Secrets tab.",
+        )
 
 
 def _build_file(content: dict, file_type: str):
@@ -142,7 +135,6 @@ def rg_health():
     return {
         "status": "ok",
         "groq_configured": bool(os.environ.get("GROQ_API_KEY")),
-        "gemini_configured": bool(os.environ.get("GEMINI_API_KEY")),
     }
 
 

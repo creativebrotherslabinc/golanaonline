@@ -367,9 +367,9 @@
         <label>AI Engine:</label>
         <div class="toggle-group" id="providerToggle">
           <input type="radio" name="provider" id="providerGroq" value="groq" checked>
-          <label for="providerGroq" id="labelGroq">⚡ AI Gen A</label>
+          <label for="providerGroq" id="labelGroq">⚡ AI Gen A <span style="font-weight:400;font-size:11px;opacity:.7">Fast</span></label>
           <input type="radio" name="provider" id="providerGemini" value="gemini">
-          <label for="providerGemini" id="labelGemini">✨ AI Gen B</label>
+          <label for="providerGemini" id="labelGemini">🧠 AI Gen B <span style="font-weight:400;font-size:11px;opacity:.7">Quality</span></label>
         </div>
       </div>
 
@@ -423,8 +423,7 @@
   </div>
 
   <div class="footer">
-    Powered by <a href="https://groq.com" target="_blank" rel="noopener">Groq (AI Gen A)</a> &amp;
-    <a href="https://deepmind.google/technologies/gemini/" target="_blank" rel="noopener">Gemini (AI Gen B)</a>
+    Powered by <a href="https://groq.com" target="_blank" rel="noopener">Groq AI</a> — free, no credit card required
     &nbsp;·&nbsp; <a href="/">← Back to Go LANA</a>
   </div>
 </div>
@@ -550,30 +549,14 @@
     }
   });
 
-  // Disable provider options if the corresponding key isn't configured
+  // Check if API key is configured on load
   fetch('/resume-genie/api/healthz')
     .then(r => r.json())
     .then(data => {
       if (!data.groq_configured) {
-        document.getElementById('providerGroq').disabled = true;
-        document.getElementById('labelGroq').title = 'GROQ_API_KEY not configured';
-        document.getElementById('labelGroq').style.opacity = '0.45';
-        document.getElementById('labelGroq').style.cursor = 'not-allowed';
-        // Auto-select Gemini if available
-        if (data.gemini_configured) {
-          document.getElementById('providerGemini').checked = true;
-        }
-      }
-      if (!data.gemini_configured) {
-        document.getElementById('providerGemini').disabled = true;
-        document.getElementById('labelGemini').title = 'GEMINI_API_KEY not configured';
-        document.getElementById('labelGemini').style.opacity = '0.45';
-        document.getElementById('labelGemini').style.cursor = 'not-allowed';
-      }
-      if (!data.groq_configured && !data.gemini_configured) {
         showStatus('info',
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-          '⚙️ <strong>Setup required:</strong> Add at least one API key (<code style="background:#dbeafe;padding:1px 5px;border-radius:4px">GROQ_API_KEY</code> or <code style="background:#dbeafe;padding:1px 5px;border-radius:4px">GEMINI_API_KEY</code>) in the Replit Secrets tab.');
+          '⚙️ <strong>Setup required:</strong> Add your <code style="background:#dbeafe;padding:1px 5px;border-radius:4px">GROQ_API_KEY</code> in the Replit Secrets tab to enable resume generation. Get a free key at <a href="https://console.groq.com" target="_blank" style="color:#1d4ed8;font-weight:600">console.groq.com</a>.');
       }
     })
     .catch(() => {});

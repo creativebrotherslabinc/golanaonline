@@ -1,8 +1,6 @@
 import os
 import json
 from groq import Groq
-from google import genai
-from google.genai import types
 
 _PROMPT_TEMPLATE = """You are an expert resume writer and career strategist. Analyze the user's career history and the target job description, then generate highly optimized resume content.
 
@@ -84,18 +82,20 @@ def _generate_with_groq(career_history: str, job_description: str) -> dict:
     return _parse_json(response.choices[0].message.content)
 
 
-def _generate_with_gemini(career_history: str, job_description: str) -> dict:
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+def _generate_with_groq_quality(career_history: str, job_description: str) -> dict:
+    """AI Gen B — higher-quality Groq model (llama-3.3-70b-versatile), free tier."""
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
     prompt = _PROMPT_TEMPLATE.format(
         career_history=career_history,
         job_description=job_description,
     )
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=4000),
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+        max_tokens=4000,
     )
-    return _parse_json(response.text)
+    return _parse_json(response.choices[0].message.content)
 
 
 def generate_resume_content(
@@ -104,5 +104,5 @@ def generate_resume_content(
     provider: str = "groq",
 ) -> dict:
     if provider == "gemini":
-        return _generate_with_gemini(career_history, job_description)
+        return _generate_with_groq_quality(career_history, job_description)
     return _generate_with_groq(career_history, job_description)
