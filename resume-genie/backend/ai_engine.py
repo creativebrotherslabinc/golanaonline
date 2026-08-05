@@ -1,12 +1,9 @@
 import os
 import json
 from groq import Groq
+import google.generativeai as genai
 
-
-def generate_resume_content(career_history: str, job_description: str) -> dict:
-    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
-    prompt = f"""You are an expert resume writer and career strategist. Analyze the user's career history and the target job description, then generate highly optimized resume content.
+_PROMPT_TEMPLATE = """You are an expert resume writer and career strategist. Analyze the user's career history and the target job description, then generate highly optimized resume content.
 
 USER CAREER HISTORY:
 {career_history}
@@ -51,30 +48,57 @@ RULES:
 - Reorder work experience to put most relevant roles first if multiple exist
 - Return ONLY valid JSON — no markdown fences, no explanation text"""
 
+
+def _parse_json(content: str) -> dict:
+    content = content.strip()
+    # Strip markdown code blocks if present
+    if content.startswith("```"):
+        lines = content.split("\n")
+        lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        content = "\n".join(lines)
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        start = content.find("{")
+        end = content.rfind("}") + 1
+        if start != -1 and end > start:
+            return json.loads(content[start:end])
+        raise ValueError(f"Could not parse AI response as JSON: {content[:200]}")
+
+
+def _generate_with_groq(career_history: str, job_description: str) -> dict:
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+    prompt = _PROMPT_TEMPLATE.format(
+        career_history=career_history,
+        job_description=job_description,
+    )
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
         max_tokens=4000,
     )
+    return _parse_json(response.choices[0].message.content)
 
-    content = response.choices[0].message.content.strip()
 
-    # Strip markdown code blocks if present
-    if content.startswith("```"):
-        lines = content.split("\n")
-        lines = lines[1:]  # Remove first ```json line
-        # Remove last ``` line
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        content = "\n".join(lines)
+def _generate_with_gemini(career_history: str, job_description: str) -> dict:
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    prompt = _PROMPT_TEMPLATE.format(
+        career_history=career_history,
+        job_description=job_description,
+    )
+    response = model.generate_content(prompt)
+    return _parse_json(response.text)
 
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        # Try to find JSON object in the response
-        start = content.find("{")
-        end = content.rfind("}") + 1
-        if start != -1 and end > start:
-            return json.loads(content[start:end])
-        raise ValueError(f"Could not parse AI response as JSON: {content[:200]}")
+
+def generate_resume_content(
+    career_history: str,
+    job_description: str,
+    provider: str = "groq",
+) -> dict:
+    if provider == "gemini":
+        return _generate_with_gemini(career_history, job_description)
+    return _generate_with_groq(career_history, job_description)
