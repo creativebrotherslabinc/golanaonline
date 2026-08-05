@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Genie – AI Resume Builder | Go LANA</title>
+  <meta name="description" content="Paste your career history and a job description — Resume Genie crafts a tailored ATS-friendly resume and cover letter in seconds." />
+  <link rel="icon" type="image/png" href="/favicon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #2563eb;
+      --blue-dark:  #1d4ed8;
+      --blue-light: #eff6ff;
+      --blue-ring:  rgba(37,99,235,.15);
+      --text:       #111827;
+      --text-mid:   #374151;
+      --text-muted: #6b7280;
+      --border:     #e5e7eb;
+      --card:       #ffffff;
+      --bg:         #f8fafc;
+      --radius:     12px;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Nav ─────────────────────────────────── */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    nav a.back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    nav a.back:hover { color: var(--blue); }
+    nav .sep { color: var(--border); font-size: 18px; }
+    nav .title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* ── Hero ────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+      color: #fff;
+      text-align: center;
+      padding: 48px 24px 40px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 16px;
+      opacity: .85;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Main layout ─────────────────────────── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── Steps ───────────────────────────────── */
+    .steps {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 99px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .step .num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Card ────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Form ────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 7px;
+    }
+    .field label span {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      min-height: 220px;
+      line-height: 1.55;
+    }
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-ring);
+    }
+    textarea::placeholder { color: #b0b8c8; }
+
+    /* ── Options row ─────────────────────────── */
+    .options-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .options-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-mid);
+      white-space: nowrap;
+    }
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+    .toggle-group input[type="radio"] { display: none; }
+    .toggle-group label {
+      padding: 7px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+    }
+    .toggle-group input[type="radio"]:checked + label {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    /* ── Generate button ─────────────────────── */
+    .generate-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 2px 12px rgba(37,99,235,.25);
+    }
+    .generate-btn:hover { background: var(--blue-dark); box-shadow: 0 4px 16px rgba(37,99,235,.35); }
+    .generate-btn:active { transform: scale(.98); }
+    .generate-btn:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    /* ── Spinner ─────────────────────────────── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status messages ─────────────────────── */
+    .status {
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .status.error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .status.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .status.info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .status svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Progress bar ────────────────────────── */
+    .progress-wrap {
+      margin-top: 16px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), #60a5fa);
+      border-radius: 99px;
+      transition: width .4s ease;
+      width: 0%;
+    }
+
+    /* ── Tips ────────────────────────────────── */
+    .tips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .tip {
+      background: var(--blue-light);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .tip .tip-icon { font-size: 20px; margin-bottom: 6px; }
+    .tip .tip-title { font-size: 13px; font-weight: 700; color: #1e40af; margin-bottom: 4px; }
+    .tip .tip-text { font-size: 12px; color: #3b5799; line-height: 1.5; }
+
+    /* ── Footer ──────────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a href="/" class="back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Go LANA
+  </a>
+  <span class="sep">/</span>
+  <span class="title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Resume Genie
+  </span>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">✨ AI-Powered</div>
+  <h1>Resume Genie</h1>
+  <p>Paste your career history and a job description — get a tailored, ATS-optimized resume + cover letter in seconds.</p>
+</div>
+
+<!-- Main -->
+<div class="container">
+
+  <!-- How it works -->
+  <div class="steps">
+    <div class="step"><span class="num">1</span> Paste your career history</div>
+    <div class="step"><span class="num">2</span> Add the job description</div>
+    <div class="step"><span class="num">3</span> Download your resume</div>
+  </div>
+
+  <!-- Form card -->
+  <div class="card">
+    <form id="resumeForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="career">Your Career History <span>(past roles, skills, achievements)</span></label>
+          <textarea id="career" name="career_history" placeholder="Example:&#10;Jane Smith&#10;&#10;Senior Software Engineer at Acme Corp (2020–present)&#10;• Led backend team of 5 engineers&#10;• Reduced API latency by 40%&#10;• Built microservices in Python/FastAPI&#10;&#10;Software Engineer at TechStart (2017–2020)&#10;• Developed React dashboards&#10;• Shipped 3 major product features&#10;&#10;Skills: Python, React, AWS, SQL, Agile"></textarea>
+        </div>
+        <div class="field">
+          <label for="jobdesc">Job Description <span>(paste the full posting)</span></label>
+          <textarea id="jobdesc" name="job_description" placeholder="Paste the full job posting here...&#10;&#10;Example:&#10;Senior Backend Engineer at StartupCo&#10;&#10;We're looking for an experienced backend engineer to join our team...&#10;&#10;Requirements:&#10;• 5+ years of Python experience&#10;• Experience with cloud infrastructure (AWS/GCP)&#10;• Strong understanding of REST APIs&#10;..."></textarea>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label>Download as:</label>
+        <div class="toggle-group">
+          <input type="radio" name="file_type" id="typePdf" value="pdf" checked>
+          <label for="typePdf">📄 PDF</label>
+          <input type="radio" name="file_type" id="typeDocx" value="docx">
+          <label for="typeDocx">📝 Word (DOCX)</label>
+        </div>
+      </div>
+
+      <button type="submit" class="generate-btn" id="generateBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Generate My Resume
+      </button>
+    </form>
+
+    <div id="progressWrap" class="progress-wrap" style="display:none">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div id="statusMsg" style="display:none"></div>
+  </div>
+
+  <!-- Tips -->
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;">💡 Tips for the best results</h3>
+    <div class="tips">
+      <div class="tip">
+        <div class="tip-icon">📋</div>
+        <div class="tip-title">Include your full name</div>
+        <div class="tip-text">Put your name at the top of your career history so the AI can personalize the resume header.</div>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">📊</div>
+        <div class="tip-title">Add numbers & results</div>
+        <div class="tip-text">Mention metrics like "increased sales by 30%" — the AI will highlight these as achievements.</div>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">📝</div>
+        <div class="tip-title">Paste the full job post</div>
+        <div class="tip-text">The more context from the job description, the better the AI can tailor keywords and skills.</div>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">🎯</div>
+        <div class="tip-title">Each resume is unique</div>
+        <div class="tip-text">Generate a fresh resume for every application — the AI tailors content to each specific role.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="https://groq.com" target="_blank" rel="noopener">Groq AI</a> &nbsp;·&nbsp;
+    <a href="/">← Back to Go LANA</a>
+  </div>
+</div>
+
+<script>
+  const form        = document.getElementById('resumeForm');
+  const btn         = document.getElementById('generateBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar = document.getElementById('progressBar');
+  const statusMsg   = document.getElementById('statusMsg');
+
+  function showStatus(type, icon, msg) {
+    statusMsg.style.display = 'flex';
+    statusMsg.className = 'status ' + type;
+    statusMsg.innerHTML = icon + '<span>' + msg + '</span>';
+  }
+
+  function setProgress(pct) {
+    progressWrap.style.display = 'block';
+    progressBar.style.width = pct + '%';
+  }
+
+  function resetUI() {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate My Resume';
+    progressWrap.style.display = 'none';
+    progressBar.style.width = '0%';
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const career = document.getElementById('career').value.trim();
+    const job    = document.getElementById('jobdesc').value.trim();
+
+    if (!career) {
+      showStatus('error',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        'Please enter your career history.');
+      return;
+    }
+    if (!job) {
+      showStatus('error',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        'Please paste a job description.');
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Generating your resume…';
+    statusMsg.style.display = 'none';
+    setProgress(15);
+
+    // Animate progress
+    let prog = 15;
+    const ticker = setInterval(() => {
+      prog = Math.min(prog + (Math.random() * 6), 85);
+      setProgress(prog);
+    }, 800);
+
+    try {
+      const fileType = document.querySelector('input[name="file_type"]:checked').value;
+      const data = new FormData();
+      data.append('career_history', career);
+      data.append('job_description', job);
+      data.append('file_type', fileType);
+
+      const resp = await fetch('/resume-genie/api/generate', {
+        method: 'POST',
+        body: data,
+      });
+
+      clearInterval(ticker);
+
+      if (!resp.ok) {
+        let errMsg = 'Generation failed. Please try again.';
+        try {
+          const err = await resp.json();
+          errMsg = err.detail || errMsg;
+        } catch (_) {}
+        if (resp.status === 503) {
+          errMsg = '⚠️ GROQ_API_KEY is not configured. Ask the site admin to add it in the Secrets tab.';
+        }
+        setProgress(0);
+        showStatus('error',
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          errMsg);
+        resetUI();
+        return;
+      }
+
+      setProgress(100);
+
+      // Trigger download
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume.' + fileType;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showStatus('success',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        '✅ Your resume is downloading! Generate another one for a different role anytime.');
+
+      resetUI();
+
+    } catch (err) {
+      clearInterval(ticker);
+      setProgress(0);
+      showStatus('error',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        'Network error: ' + err.message);
+      resetUI();
+    }
+  });
+
+  // Check if API key is configured on load
+  fetch('/resume-genie/api/healthz')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.groq_configured) {
+        showStatus('info',
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          '⚙️ <strong>Setup required:</strong> Add your <code style="background:#dbeafe;padding:1px 5px;border-radius:4px">GROQ_API_KEY</code> in the Replit Secrets tab to enable resume generation. Get a free key at <a href="https://console.groq.com" target="_blank" style="color:#1d4ed8;font-weight:600">console.groq.com</a>.');
+      }
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
