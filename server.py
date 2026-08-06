@@ -113,6 +113,17 @@ async def proxy_geocode_search(request: Request):
         raise HTTPException(status_code=502, detail=str(e))
 
 
+# ── Resume Genie page — inject API key ───────────────────────────────
+
+@app.get("/resume-genie/")
+@app.get("/resume-genie/index.html")
+async def rg_page():
+    """Serve Resume Genie with the Groq API key injected client-side."""
+    html = (ROOT / "resume-genie" / "index.html").read_text(encoding="utf-8")
+    key  = os.environ.get("GROQ_API_KEY", "")
+    return Response(content=html.replace("__GROQ_API_KEY__", key), media_type="text/html")
+
+
 # ── Resume Genie API ──────────────────────────────────────────────────
 
 def _check_provider(provider: str):

@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Client-side generation libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,418 +34,205 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      padding-top: 57px;
     }
 
-    /* ── Nav ─────────────────────────────────── */
-    nav {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
+    /* ── Go LANA top bar ─────────────────────── */
+    .golana-topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 57px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      background: rgba(248,250,252,.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e2e8f0;
     }
-    nav a.back {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: color .15s;
+    .golana-topbar-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; color: inherit;
     }
-    nav a.back:hover { color: var(--blue); }
-    nav .sep { color: var(--border); font-size: 18px; }
-    nav .title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 7px;
+    .golana-topbar-logo img { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
+    .golana-topbar-logo-text { font-size: 1.125rem; font-weight: 700; letter-spacing: -.02em; color: #0f172a; }
+    .golana-topbar-logo-text span { color: #2563eb; }
+    .golana-topbar-right { position: relative; }
+    .golana-hamburger {
+      display: flex; flex-direction: column; justify-content: center; gap: 5px;
+      width: 36px; height: 36px; padding: 6px;
+      background: none; border: 1px solid #e2e8f0; border-radius: 8px;
+      cursor: pointer; transition: background .15s, border-color .15s;
     }
+    .golana-hamburger:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .golana-hamburger span { display: block; height: 2px; background: #475569; border-radius: 2px; }
+    .golana-dropdown {
+      display: none; position: absolute; top: calc(100% + 10px); right: 0;
+      min-width: 220px; background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      overflow: hidden; z-index: 200; animation: dropdownIn .15s ease;
+    }
+    .golana-dropdown.open { display: block; }
+    @keyframes dropdownIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .golana-dropdown a {
+      display: block; padding: 11px 18px; font-size: .875rem; font-weight: 500;
+      color: #334155; text-decoration: none; transition: background .1s, color .1s;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .golana-dropdown a:last-child { border-bottom: none; }
+    .golana-dropdown a:hover { background: #f8fafc; color: #2563eb; }
 
     /* ── Hero ────────────────────────────────── */
     .hero {
       background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
-      color: #fff;
-      text-align: center;
-      padding: 48px 24px 40px;
+      color: #fff; text-align: center; padding: 48px 24px 40px;
     }
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: 99px;
-      padding: 5px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px; padding: 5px 14px; font-size: 12px; font-weight: 600;
+      letter-spacing: .04em; text-transform: uppercase; margin-bottom: 16px;
     }
-    .hero h1 {
-      font-size: clamp(26px, 5vw, 40px);
-      font-weight: 700;
-      line-height: 1.15;
-      margin-bottom: 12px;
-    }
-    .hero p {
-      font-size: 16px;
-      opacity: .85;
-      max-width: 540px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+    .hero h1 { font-size: clamp(26px,5vw,40px); font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+    .hero p { font-size: 16px; opacity: .85; max-width: 540px; margin: 0 auto; line-height: 1.6; }
 
-    /* ── Main layout ─────────────────────────── */
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 32px 20px 60px;
-    }
+    /* ── Layout ──────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
 
     /* ── Steps ───────────────────────────────── */
-    .steps {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
+    .steps { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
     .step {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 99px;
-      background: #fff;
-      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500;
+      color: var(--text-muted); padding: 6px 12px; border-radius: 99px;
+      background: #fff; border: 1px solid var(--border);
     }
     .step .num {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: var(--blue);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%; background: var(--blue); color: #fff;
+      font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
     }
 
     /* ── Card ────────────────────────────────── */
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      padding: 28px;
-      margin-bottom: 20px;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06); padding: 28px; margin-bottom: 20px;
     }
 
     /* ── Form ────────────────────────────────── */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
-
-    .field label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-mid);
-      margin-bottom: 7px;
-    }
-    .field label span {
-      font-weight: 400;
-      color: var(--text-muted);
-      font-size: 12px;
-    }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-mid); margin-bottom: 7px; }
+    .field label span { font-weight: 400; color: var(--text-muted); font-size: 12px; }
     textarea {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 9px;
-      padding: 12px 14px;
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
-      resize: vertical;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-      min-height: 220px;
-      line-height: 1.55;
+      width: 100%; border: 1.5px solid var(--border); border-radius: 9px;
+      padding: 12px 14px; font-family: inherit; font-size: 14px; color: var(--text);
+      background: #fff; resize: vertical; outline: none;
+      transition: border-color .2s, box-shadow .2s; min-height: 220px; line-height: 1.55;
     }
-    textarea:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px var(--blue-ring);
-    }
+    textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-ring); }
     textarea::placeholder { color: #b0b8c8; }
 
     /* ── Multi-job tabs ──────────────────────── */
-    .job-tabs-wrap {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
-    }
+    .job-tabs-wrap { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
     .job-tab-bar {
-      display: flex;
-      align-items: center;
-      background: #f8fafc;
-      border-bottom: 1.5px solid var(--border);
-      padding: 0 4px;
-      gap: 2px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      display: flex; align-items: center; background: #f8fafc;
+      border-bottom: 1.5px solid var(--border); padding: 0 4px; gap: 2px;
+      overflow-x: auto; scrollbar-width: none;
     }
     .job-tab-bar::-webkit-scrollbar { display: none; }
     .job-tab {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 9px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      border: none;
-      background: none;
-      border-bottom: 2.5px solid transparent;
-      margin-bottom: -1.5px;
-      white-space: nowrap;
-      transition: color .15s, border-color .15s;
-      font-family: inherit;
+      position: relative; display: flex; align-items: center; gap: 5px;
+      padding: 9px 14px; font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; border: none; background: none; border-bottom: 2.5px solid transparent;
+      margin-bottom: -1.5px; white-space: nowrap; transition: color .15s, border-color .15s; font-family: inherit;
     }
     .job-tab:hover { color: var(--blue); }
-    .job-tab.active {
-      color: var(--blue);
-      border-bottom-color: var(--blue);
-      background: #fff;
-    }
+    .job-tab.active { color: var(--blue); border-bottom-color: var(--blue); background: #fff; }
     .job-tab .tab-num {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: var(--border);
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s, color .15s;
+      width: 20px; height: 20px; border-radius: 50%; background: var(--border);
+      color: var(--text-muted); font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; transition: background .15s, color .15s;
     }
-    .job-tab.active .tab-num,
-    .job-tab:hover .tab-num {
-      background: var(--blue);
-      color: #fff;
-    }
+    .job-tab.active .tab-num, .job-tab:hover .tab-num { background: var(--blue); color: #fff; }
     .job-tab .tab-close {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex; align-items: center; justify-content: center;
-      padding: 0;
-      transition: background .15s, color .15s;
-      font-family: inherit;
-      line-height: 1;
+      width: 16px; height: 16px; border-radius: 50%; background: none; border: none;
+      cursor: pointer; font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; padding: 0;
+      transition: background .15s, color .15s; font-family: inherit; line-height: 1;
     }
     .job-tab .tab-close:hover { background: #fecaca; color: #dc2626; }
     .job-tab-add {
-      padding: 8px 10px;
-      font-size: 18px;
-      font-weight: 400;
-      color: var(--text-muted);
-      cursor: pointer;
-      border: none;
-      background: none;
-      border-radius: 6px;
-      transition: background .15s, color .15s;
-      line-height: 1;
-      font-family: inherit;
-      margin-left: 2px;
+      padding: 8px 10px; font-size: 18px; font-weight: 400; color: var(--text-muted);
+      cursor: pointer; border: none; background: none; border-radius: 6px;
+      transition: background .15s, color .15s; line-height: 1; font-family: inherit; margin-left: 2px;
     }
     .job-tab-add:hover { background: var(--blue-light); color: var(--blue); }
     .job-tab-add:disabled { opacity: .35; cursor: not-allowed; }
-    .job-panel textarea {
-      border: none;
-      border-radius: 0;
-      min-height: 200px;
-      box-shadow: none;
-      resize: vertical;
-    }
+    .job-panel textarea { border: none; border-radius: 0; min-height: 200px; box-shadow: none; resize: vertical; }
     .job-panel textarea:focus { box-shadow: none; }
 
     /* ── Options row ─────────────────────────── */
-    .options-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    .options-row label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-mid);
-      white-space: nowrap;
-    }
-    .toggle-group {
-      display: flex;
-      gap: 8px;
-    }
+    .options-row { display: flex; align-items: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .options-row label { font-size: 13px; font-weight: 600; color: var(--text-mid); white-space: nowrap; }
+    .toggle-group { display: flex; gap: 8px; }
     .toggle-group input[type="radio"] { display: none; }
     .toggle-group label {
-      padding: 7px 18px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all .15s;
-      background: #fff;
+      padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .15s; background: #fff;
     }
-    .toggle-group input[type="radio"]:checked + label {
-      border-color: var(--blue);
-      color: var(--blue);
-      background: var(--blue-light);
-    }
+    .toggle-group input[type="radio"]:checked + label { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
 
     /* ── Generate button ─────────────────────── */
     .generate-btn {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      transition: background .15s, transform .1s, box-shadow .15s;
-      box-shadow: 0 2px 12px rgba(37,99,235,.25);
+      margin-top: 20px; width: 100%; padding: 14px; background: var(--blue); color: #fff;
+      border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: background .15s, transform .1s, box-shadow .15s; box-shadow: 0 2px 12px rgba(37,99,235,.25);
     }
     .generate-btn:hover { background: var(--blue-dark); box-shadow: 0 4px 16px rgba(37,99,235,.35); }
     .generate-btn:active { transform: scale(.98); }
     .generate-btn:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
 
     /* ── Spinner ─────────────────────────────── */
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2.5px solid rgba(255,255,255,.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
-    }
+    .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Status messages ─────────────────────── */
-    .status {
-      padding: 14px 18px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-top: 16px;
-    }
+    .status { padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; }
     .status.error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
     .status.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
     .status.info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
     .status svg { flex-shrink: 0; margin-top: 1px; }
 
     /* ── Progress bar ────────────────────────── */
-    .progress-wrap {
-      margin-top: 16px;
-      background: #e2e8f0;
-      border-radius: 99px;
-      height: 6px;
-      overflow: hidden;
-    }
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--blue), #60a5fa);
-      border-radius: 99px;
-      transition: width .4s ease;
-      width: 0%;
-    }
+    .progress-wrap { margin-top: 16px; background: #e2e8f0; border-radius: 99px; height: 6px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--blue), #60a5fa); border-radius: 99px; transition: width .4s ease; width: 0%; }
 
     /* ── Tips ────────────────────────────────── */
-    .tips {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 14px;
-      margin-top: 8px;
-    }
-    .tip {
-      background: var(--blue-light);
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      padding: 14px 16px;
-    }
+    .tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 8px; }
+    .tip { background: var(--blue-light); border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 16px; }
     .tip .tip-icon { font-size: 20px; margin-bottom: 6px; }
     .tip .tip-title { font-size: 13px; font-weight: 700; color: #1e40af; margin-bottom: 4px; }
     .tip .tip-text { font-size: 12px; color: #3b5799; line-height: 1.5; }
 
     /* ── Scroll-to-top ───────────────────────── */
     .golana-scroll-top {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 99;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(37,99,235,.45);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity .25s, transform .25s, box-shadow .15s;
-      pointer-events: none;
+      position: fixed; bottom: 24px; right: 24px; z-index: 99;
+      width: 44px; height: 44px; border-radius: 50%; background: #2563eb; color: #fff;
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(37,99,235,.45); opacity: 0; transform: translateY(12px);
+      transition: opacity .25s, transform .25s, box-shadow .15s; pointer-events: none;
     }
-    .golana-scroll-top.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    .golana-scroll-top:hover {
-      box-shadow: 0 6px 20px rgba(37,99,235,.6);
-      transform: scale(1.08);
-    }
+    .golana-scroll-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .golana-scroll-top:hover { box-shadow: 0 6px 20px rgba(37,99,235,.6); transform: scale(1.08); }
     .golana-scroll-top svg { width: 20px; height: 20px; }
 
     /* ── Footer ──────────────────────────────── */
-    .footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+    .footer { text-align: center; margin-top: 40px; font-size: 13px; color: var(--text-muted); }
     .footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
     .footer a:hover { text-decoration: underline; }
   </style>
@@ -454,18 +244,29 @@
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
 
-<!-- Nav -->
-<nav>
-  <a href="/" class="back">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Go LANA
+<!-- Go LANA Top Bar -->
+<header class="golana-topbar">
+  <a href="/" class="golana-topbar-logo">
+    <img src="/favicon.png" alt="Go LANA logo" />
+    <span class="golana-topbar-logo-text">Go LANA<span>.online</span></span>
   </a>
-  <span class="sep">/</span>
-  <span class="title">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-    Resume Genie
-  </span>
-</nav>
+  <div class="golana-topbar-right">
+    <button class="golana-hamburger" id="golana-hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="golana-dropdown" id="golana-dropdown" aria-hidden="true">
+      <a href="/#pdf">📄 PDF Tools</a>
+      <a href="/#media">🖼️ Media</a>
+      <a href="/#calc">💰 Calculators</a>
+      <a href="/#tools">🛠️ Everyday Utilities</a>
+      <a href="/#ai">🤖 AI Mini Tools</a>
+      <a href="/#dev">&lt;/&gt; Developer Tools</a>
+      <a href="/#time">🕐 Time &amp; Planning</a>
+      <a href="/#games">🎮 Games</a>
+      <a href="/#apps">📱 Apps</a>
+    </div>
+  </div>
+</header>
 
 <!-- Hero -->
 <div class="hero">
@@ -477,14 +278,12 @@
 <!-- Main -->
 <div class="container">
 
-  <!-- How it works -->
   <div class="steps">
     <div class="step"><span class="num">1</span> Paste your career history</div>
     <div class="step"><span class="num">2</span> Add the job description</div>
     <div class="step"><span class="num">3</span> Download your resume</div>
   </div>
 
-  <!-- Form card -->
   <div class="card">
     <form id="resumeForm">
       <div class="form-grid">
@@ -505,11 +304,11 @@
 
       <div class="options-row">
         <label>AI Engine:</label>
-        <div class="toggle-group" id="providerToggle">
+        <div class="toggle-group">
           <input type="radio" name="provider" id="providerGroq" value="groq" checked>
-          <label for="providerGroq" id="labelGroq">⚡ AI Gen A <span style="font-weight:400;font-size:11px;opacity:.7">Fast</span></label>
+          <label for="providerGroq">⚡ AI Gen A <span style="font-weight:400;font-size:11px;opacity:.7">Fast</span></label>
           <input type="radio" name="provider" id="providerGemini" value="gemini">
-          <label for="providerGemini" id="labelGemini">🧠 AI Gen B <span style="font-weight:400;font-size:11px;opacity:.7">Quality</span></label>
+          <label for="providerGemini">🧠 AI Gen B <span style="font-weight:400;font-size:11px;opacity:.7">Quality</span></label>
         </div>
       </div>
 
@@ -535,7 +334,6 @@
     <div id="statusMsg" style="display:none"></div>
   </div>
 
-  <!-- Tips -->
   <div class="card">
     <h3 style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;">💡 Tips for the best results</h3>
     <div class="tips">
@@ -569,228 +367,447 @@
 </div>
 
 <script>
-  const form         = document.getElementById('resumeForm');
-  const btn          = document.getElementById('generateBtn');
-  const progressWrap = document.getElementById('progressWrap');
-  const progressBar  = document.getElementById('progressBar');
-  const statusMsg    = document.getElementById('statusMsg');
-  const tabBar       = document.getElementById('jobTabBar');
-  const jobTextarea  = document.getElementById('jobTextarea');
-  const MAX_JOBS     = 5;
+// ── Config ──────────────────────────────────────────────────────────────────
+const GROQ_API_KEY = '__GROQ_API_KEY__';
+const MODELS = {
+  groq:   'llama-3.1-8b-instant',    // AI Gen A — fast
+  gemini: 'llama-3.3-70b-versatile', // AI Gen B — quality
+};
 
-  const ERR_ICON  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-  const OK_ICON   = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-  const INFO_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+// ── DOM refs ────────────────────────────────────────────────────────────────
+const form         = document.getElementById('resumeForm');
+const btn          = document.getElementById('generateBtn');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar  = document.getElementById('progressBar');
+const statusMsg    = document.getElementById('statusMsg');
+const tabBar       = document.getElementById('jobTabBar');
+const jobTextarea  = document.getElementById('jobTextarea');
+const MAX_JOBS     = 5;
 
-  // ── State ──────────────────────────────────────────────────────────
-  let jobs      = [''];   // array of job description strings
-  let activeIdx = 0;
+const ERR_ICON  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+const OK_ICON   = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+const INFO_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
 
-  // ── Helpers ────────────────────────────────────────────────────────
-  function saveActive() {
-    jobs[activeIdx] = jobTextarea.value;
-  }
+// ── Tab state ────────────────────────────────────────────────────────────────
+let jobs      = [''];
+let activeIdx = 0;
 
-  function loadActive() {
-    jobTextarea.value = jobs[activeIdx];
-    jobTextarea.focus();
-  }
+function saveActive()  { jobs[activeIdx] = jobTextarea.value; }
+function loadActive()  { jobTextarea.value = jobs[activeIdx]; }
+function filledJobs()  { jobs[activeIdx] = jobTextarea.value; return jobs.map(j => j.trim()).filter(Boolean); }
 
-  function filledJobs() {
-    // Flush current textarea into state first
-    jobs[activeIdx] = jobTextarea.value;
-    return jobs.map(j => j.trim()).filter(j => j.length > 0);
-  }
+function showStatus(type, icon, msg) {
+  statusMsg.style.display = 'flex';
+  statusMsg.className = 'status ' + type;
+  statusMsg.innerHTML = icon + '<span>' + msg + '</span>';
+}
+function setProgress(pct) { progressWrap.style.display = 'block'; progressBar.style.width = pct + '%'; }
+function updateBtn() {
+  const n = filledJobs().length, multi = n > 1;
+  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> ${multi ? 'Generate ' + n + ' Resumes' : 'Generate My Resume'}`;
+}
+function resetUI() { btn.disabled = false; updateBtn(); progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }
 
-  function showStatus(type, icon, msg) {
-    statusMsg.style.display = 'flex';
-    statusMsg.className = 'status ' + type;
-    statusMsg.innerHTML = icon + '<span>' + msg + '</span>';
-  }
-
-  function setProgress(pct) {
-    progressWrap.style.display = 'block';
-    progressBar.style.width = pct + '%';
-  }
-
-  function updateBtn() {
-    const count = filledJobs().length;
-    const multi = count > 1;
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> ${multi ? 'Generate ' + count + ' Resumes' : 'Generate My Resume'}`;
-  }
-
-  function resetUI() {
-    btn.disabled = false;
-    updateBtn();
-    progressWrap.style.display = 'none';
-    progressBar.style.width = '0%';
-  }
-
-  // ── Tab rendering ──────────────────────────────────────────────────
-  function renderTabs() {
-    tabBar.innerHTML = '';
-
-    jobs.forEach((_, i) => {
-      const tab = document.createElement('button');
-      tab.type = 'button';
-      tab.className = 'job-tab' + (i === activeIdx ? ' active' : '');
-
-      const numSpan = document.createElement('span');
-      numSpan.className = 'tab-num';
-      numSpan.textContent = i + 1;
-      tab.appendChild(numSpan);
-
-      // Only show close on non-first tabs, or any tab if there's more than one
-      if (jobs.length > 1) {
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'tab-close';
-        close.title = 'Remove job ' + (i + 1);
-        close.textContent = '✕';
-        close.addEventListener('click', (e) => {
-          e.stopPropagation();
-          saveActive();
-          jobs.splice(i, 1);
-          if (activeIdx >= jobs.length) activeIdx = jobs.length - 1;
-          renderTabs();
-          loadActive();
-          updateBtn();
-        });
-        tab.appendChild(close);
-      }
-
-      tab.addEventListener('click', () => {
-        saveActive();
-        activeIdx = i;
-        renderTabs();
-        loadActive();
-        updateBtn();
-      });
-
-      tabBar.appendChild(tab);
-    });
-
-    // "+" add button
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'job-tab-add';
-    addBtn.title = jobs.length >= MAX_JOBS ? 'Maximum 5 jobs' : 'Add a job';
-    addBtn.textContent = '+';
-    addBtn.disabled = jobs.length >= MAX_JOBS;
-    addBtn.addEventListener('click', () => {
-      if (jobs.length >= MAX_JOBS) return;
-      saveActive();
-      jobs.push('');
-      activeIdx = jobs.length - 1;
-      renderTabs();
-      loadActive();
-      updateBtn();
-    });
-    tabBar.appendChild(addBtn);
-  }
-
-  // ── Init ───────────────────────────────────────────────────────────
-  renderTabs();
-  loadActive();
-  updateBtn();
-
-  jobTextarea.addEventListener('input', updateBtn);
-
-  // ── Form submit ────────────────────────────────────────────────────
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const career = document.getElementById('career').value.trim();
-    const filled = filledJobs();
-
-    if (!career) { showStatus('error', ERR_ICON, 'Please enter your career history.'); return; }
-    if (filled.length === 0) { showStatus('error', ERR_ICON, 'Please paste at least one job description.'); return; }
-
-    const multi    = filled.length > 1;
-    const fileType = document.querySelector('input[name="file_type"]:checked').value;
-    const provider = document.querySelector('input[name="provider"]:checked').value;
-
-    btn.disabled = true;
-    btn.innerHTML = `<div class="spinner"></div> ${multi ? 'Generating ' + filled.length + ' resumes…' : 'Generating your resume…'}`;
-    statusMsg.style.display = 'none';
-    setProgress(15);
-
-    let prog = 15;
-    const ticker = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 5, 88);
-      setProgress(prog);
-    }, 900);
-
-    try {
-      let resp;
-      const data = new FormData();
-      data.append('career_history', career);
-      data.append('file_type', fileType);
-      data.append('provider', provider);
-
-      if (multi) {
-        data.append('job_descriptions', JSON.stringify(filled));
-        resp = await fetch('/resume-genie/api/generate-multi', { method: 'POST', body: data });
-      } else {
-        data.append('job_description', filled[0]);
-        resp = await fetch('/resume-genie/api/generate', { method: 'POST', body: data });
-      }
-
-      clearInterval(ticker);
-
-      if (!resp.ok) {
-        let errMsg = 'Generation failed. Please try again.';
-        try { const err = await resp.json(); errMsg = err.detail || errMsg; } catch (_) {}
-        if (resp.status === 503) errMsg = '⚠️ GROQ_API_KEY is not configured. Add it in the Replit Secrets tab.';
-        setProgress(0);
-        showStatus('error', ERR_ICON, errMsg);
-        resetUI();
-        return;
-      }
-
-      setProgress(100);
-
-      const blob = await resp.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
-      a.download = multi ? 'Tailored_Resumes.zip' : 'resume.' + fileType;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showStatus('success', OK_ICON,
-        multi
-          ? `✅ ${filled.length} tailored resumes downloading as a ZIP!`
-          : '✅ Your resume is downloading! Generate for another role anytime.');
-      resetUI();
-
-    } catch (err) {
-      clearInterval(ticker);
-      setProgress(0);
-      showStatus('error', ERR_ICON, 'Network error: ' + err.message);
-      resetUI();
+function renderTabs() {
+  tabBar.innerHTML = '';
+  jobs.forEach((_, i) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'job-tab' + (i === activeIdx ? ' active' : '');
+    const num = document.createElement('span'); num.className = 'tab-num'; num.textContent = i + 1;
+    tab.appendChild(num);
+    if (jobs.length > 1) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'tab-close'; x.title = 'Remove'; x.textContent = '✕';
+      x.addEventListener('click', e => { e.stopPropagation(); saveActive(); jobs.splice(i, 1); if (activeIdx >= jobs.length) activeIdx = jobs.length - 1; renderTabs(); loadActive(); updateBtn(); });
+      tab.appendChild(x);
     }
+    tab.addEventListener('click', () => { saveActive(); activeIdx = i; renderTabs(); loadActive(); updateBtn(); });
+    tabBar.appendChild(tab);
   });
+  const add = document.createElement('button'); add.type = 'button'; add.className = 'job-tab-add'; add.textContent = '+'; add.disabled = jobs.length >= MAX_JOBS; add.title = jobs.length >= MAX_JOBS ? 'Maximum 5 jobs' : 'Add a job';
+  add.addEventListener('click', () => { if (jobs.length >= MAX_JOBS) return; saveActive(); jobs.push(''); activeIdx = jobs.length - 1; renderTabs(); loadActive(); updateBtn(); });
+  tabBar.appendChild(add);
+}
 
-  // ── Scroll to top ─────────────────────────────────────────────────
-  const scrollTopBtn = document.getElementById('scrollTop');
-  window.addEventListener('scroll', () => {
-    scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
-  }, { passive: true });
-  scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+renderTabs(); loadActive(); updateBtn();
+jobTextarea.addEventListener('input', updateBtn);
 
-  // ── API key check ──────────────────────────────────────────────────
-  fetch('/resume-genie/api/healthz')
-    .then(r => r.json())
-    .then(data => {
-      if (!data.groq_configured) {
-        showStatus('info', INFO_ICON,
-          '⚙️ <strong>Setup required:</strong> Add your <code style="background:#dbeafe;padding:1px 5px;border-radius:4px">GROQ_API_KEY</code> in the Replit Secrets tab. Free key at <a href="https://console.groq.com" target="_blank" style="color:#1d4ed8;font-weight:600">console.groq.com</a>.');
+// ── Groq API call ────────────────────────────────────────────────────────────
+const PROMPT_TEMPLATE = (career, job) => `You are an expert resume writer and career strategist. Analyze the user's career history and the target job description, then generate highly optimized resume content.
+
+USER CAREER HISTORY:
+${career}
+
+TARGET JOB DESCRIPTION:
+${job}
+
+Generate a JSON response with EXACTLY these fields:
+{
+  "candidate_name": "Full name extracted from career history, or 'Applicant' if not found",
+  "target_role": "The job title from the job description",
+  "professional_summary": "3-4 sentence ATS-optimized professional summary. Lead with years of experience and key value proposition. Naturally incorporate 3-5 keywords from the job description.",
+  "skills": ["skill1", "skill2", "skill3"],
+  "work_experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "dates": "Month Year – Month Year (or Present)",
+      "bullets": ["Achievement bullet starting with strong action verb, quantified where possible", "Achievement bullet 2", "Achievement bullet 3"]
+    }
+  ],
+  "education": [{"degree": "Degree Name and Field", "institution": "Institution Name", "year": "Year"}],
+  "certifications": ["Certification 1"],
+  "cover_letter": "Full professional cover letter with 4 paragraphs: opening hook mentioning specific company/role, 2 middle paragraphs highlighting 2-3 relevant achievements from history that match the job, closing with call to action. Address: Dear Hiring Manager.",
+  "ats_keywords": ["keyword1", "keyword2"]
+}
+
+RULES:
+- skills: 12-18 items, mix of technical and soft skills, prioritize those mentioned in job description
+- work_experience bullets: 3-5 per role, start with strong verbs, quantify with numbers/percentages where possible
+- cover_letter: personalized, specific, compelling — not generic
+- Return ONLY valid JSON — no markdown fences, no explanation text`;
+
+async function callGroq(careerHistory, jobDescription, provider) {
+  const model = MODELS[provider] || MODELS.groq;
+  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: PROMPT_TEMPLATE(careerHistory, jobDescription) }], temperature: 0.3, max_tokens: 4000 })
+  });
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({}));
+    throw new Error(e.error?.message || `Groq API error ${resp.status}`);
+  }
+  let text = (await resp.json()).choices[0].message.content.trim();
+  // Strip markdown fences if present
+  if (text.startsWith('```')) text = text.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
+  try { return JSON.parse(text); }
+  catch {
+    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+    if (s !== -1 && e > s) return JSON.parse(text.slice(s, e + 1));
+    throw new Error('Could not parse AI response as JSON.');
+  }
+}
+
+// ── PDF generation (jsPDF) ───────────────────────────────────────────────────
+function generatePDF(c) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const ML = 18, MR = 18, PW = 210, CW = PW - ML - MR;
+  let y = 22;
+
+  const chk = h => { if (y + h > 277) { doc.addPage(); y = 22; } };
+  const rule = () => { doc.setDrawColor(229,231,235); doc.setLineWidth(0.4); doc.line(ML, y, PW - MR, y); y += 5; };
+  const section = title => {
+    chk(12); y += 3;
+    doc.setFillColor(239,246,255); doc.rect(ML, y - 4, CW, 7, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(30,58,138);
+    doc.text(title, ML + 2, y); y += 6;
+    doc.setTextColor(55,65,81);
+  };
+
+  // ── Name ──
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(15,23,42);
+  doc.text(c.candidate_name || 'Resume', ML, y); y += 8;
+
+  // ── Role ──
+  if (c.target_role) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(37,99,235);
+    doc.text(c.target_role, ML, y); y += 7;
+  }
+
+  rule();
+
+  // ── Summary ──
+  if (c.professional_summary) {
+    section('PROFESSIONAL SUMMARY');
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+    const lines = doc.splitTextToSize(c.professional_summary, CW);
+    chk(lines.length * 4.8); doc.text(lines, ML, y); y += lines.length * 4.8 + 6;
+  }
+
+  // ── Skills ──
+  if (c.skills && c.skills.length) {
+    section('SKILLS');
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+    const lines = doc.splitTextToSize(c.skills.join('  ·  '), CW);
+    chk(lines.length * 4.8); doc.text(lines, ML, y); y += lines.length * 4.8 + 6;
+  }
+
+  // ── Experience ──
+  if (c.work_experience && c.work_experience.length) {
+    section('WORK EXPERIENCE');
+    for (const exp of c.work_experience) {
+      chk(16);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(15,23,42);
+      doc.text((exp.title || '') + ' — ' + (exp.company || ''), ML, y);
+      doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(107,114,128);
+      doc.text(exp.dates || '', PW - MR, y, { align: 'right' }); y += 5;
+      for (const b of (exp.bullets || [])) {
+        const lines = doc.splitTextToSize('• ' + b, CW - 4);
+        chk(lines.length * 4.5);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+        doc.text(lines, ML + 3, y); y += lines.length * 4.5;
       }
-    })
-    .catch(() => {});
+      y += 4;
+    }
+  }
+
+  // ── Education ──
+  if (c.education && c.education.length) {
+    section('EDUCATION');
+    for (const edu of c.education) {
+      chk(12);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(15,23,42);
+      doc.text(edu.degree || '', ML, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(107,114,128);
+      doc.text(edu.year || '', PW - MR, y, { align: 'right' }); y += 5;
+      doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+      doc.text(edu.institution || '', ML, y); y += 6;
+    }
+  }
+
+  // ── Certifications ──
+  const certs = (c.certifications || []).filter(Boolean);
+  if (certs.length) {
+    section('CERTIFICATIONS');
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+    for (const cert of certs) { chk(5); doc.text('• ' + cert, ML + 3, y); y += 5; }
+    y += 2;
+  }
+
+  // ── Cover Letter (new page) ──
+  if (c.cover_letter) {
+    doc.addPage(); y = 22;
+    doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(15,23,42);
+    doc.text('COVER LETTER', ML, y); y += 3; rule();
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(55,65,81);
+    for (const para of c.cover_letter.split(/\n\n+/)) {
+      if (!para.trim()) continue;
+      const lines = doc.splitTextToSize(para.trim(), CW);
+      chk(lines.length * 4.8); doc.text(lines, ML, y); y += lines.length * 4.8 + 5;
+    }
+  }
+
+  return doc.output('arraybuffer');
+}
+
+// ── DOCX generation (raw OOXML via JSZip) ────────────────────────────────────
+function xmlEsc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function wRun(text, opts = {}) {
+  const rpr = [
+    opts.bold   ? '<w:b/><w:bCs/>' : '',
+    opts.italic ? '<w:i/><w:iCs/>' : '',
+    opts.size   ? `<w:sz w:val="${opts.size*2}"/><w:szCs w:val="${opts.size*2}"/>` : '',
+    opts.color  ? `<w:color w:val="${opts.color}"/>` : '',
+  ].join('');
+  return `<w:r>${rpr?`<w:rPr>${rpr}</w:rPr>`:''}<w:t xml:space="preserve">${xmlEsc(text)}</w:t></w:r>`;
+}
+
+function wPara(runs, opts = {}) {
+  const spc = (opts.before||opts.after) ? `<w:spacing w:before="${opts.before||0}" w:after="${opts.after||120}" w:line="276" w:lineRule="auto"/>` : '';
+  const ind = opts.indent ? `<w:ind w:left="${opts.indent}"/>` : '';
+  const shd = opts.shade  ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.shade}"/>` : '';
+  const ppr = (spc||ind||shd) ? `<w:pPr>${spc}${ind}${shd}</w:pPr>` : '';
+  return `<w:p>${ppr}${runs}</w:p>`;
+}
+
+function buildDocxBody(c) {
+  const out = [];
+
+  const sec = title => {
+    out.push(wPara(wRun(title,{bold:true,size:10,color:'1E3A8A'}),{before:180,after:60,shade:'EFF6FF'}));
+  };
+
+  // Name
+  out.push(wPara(wRun(c.candidate_name||'Resume',{bold:true,size:20,color:'0F172A'}),{after:60}));
+  // Role
+  if (c.target_role) out.push(wPara(wRun(c.target_role,{size:13,color:'2563EB'}),{after:120}));
+
+  // Summary
+  if (c.professional_summary) {
+    sec('PROFESSIONAL SUMMARY');
+    out.push(wPara(wRun(c.professional_summary,{size:10}),{after:120}));
+  }
+
+  // Skills
+  if (c.skills&&c.skills.length) {
+    sec('SKILLS');
+    out.push(wPara(wRun(c.skills.join('  ·  '),{size:10}),{after:120}));
+  }
+
+  // Experience
+  if (c.work_experience&&c.work_experience.length) {
+    sec('WORK EXPERIENCE');
+    for (const exp of c.work_experience) {
+      out.push(wPara(
+        wRun((exp.title||'')+' — '+(exp.company||''),{bold:true,size:11})+
+        wRun('  '+(exp.dates||''),{size:9,italic:true,color:'6B7280'}),
+        {before:80,after:40}
+      ));
+      for (const b of (exp.bullets||[]))
+        out.push(wPara(wRun('• '+b,{size:10}),{after:30,indent:360}));
+    }
+  }
+
+  // Education
+  if (c.education&&c.education.length) {
+    sec('EDUCATION');
+    for (const edu of c.education) {
+      out.push(wPara(
+        wRun(edu.degree||'',{bold:true,size:11})+wRun('  '+(edu.year||''),{size:9,color:'6B7280'}),
+        {before:60,after:20}
+      ));
+      if (edu.institution) out.push(wPara(wRun(edu.institution,{size:10}),{after:60}));
+    }
+  }
+
+  // Certifications
+  const certs=(c.certifications||[]).filter(Boolean);
+  if (certs.length) { sec('CERTIFICATIONS'); for (const cert of certs) out.push(wPara(wRun('• '+cert,{size:10}),{after:30,indent:360})); }
+
+  // Cover Letter
+  if (c.cover_letter) {
+    out.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
+    out.push(wPara(wRun('COVER LETTER',{bold:true,size:14,color:'1E3A8A'}),{after:180}));
+    for (const p of c.cover_letter.split(/\n\n+/))
+      if (p.trim()) out.push(wPara(wRun(p.trim(),{size:10}),{after:100}));
+  }
+
+  out.push('<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>');
+  return out.join('');
+}
+
+async function generateDOCX(c) {
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+</Types>`);
+  zip.file('_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+  zip.file('word/_rels/document.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`);
+  zip.file('word/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr>
+<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+<w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="en-US"/>
+</w:rPr></w:rPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+</w:styles>`);
+  zip.file('word/document.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>${buildDocxBody(c)}</w:body></w:document>`);
+  return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+
+// ── Download helper ──────────────────────────────────────────────────────────
+function download(blobOrBuffer, filename) {
+  const blob = blobOrBuffer instanceof Blob ? blobOrBuffer : new Blob([blobOrBuffer]);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+// ── Form submission ──────────────────────────────────────────────────────────
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  if (!GROQ_API_KEY || GROQ_API_KEY === '__GROQ_API_KEY__') {
+    showStatus('error', ERR_ICON, '⚠️ API key not configured. The site admin needs to embed the Groq API key.');
+    return;
+  }
+
+  const career   = document.getElementById('career').value.trim();
+  const filled   = filledJobs();
+  const fileType = document.querySelector('input[name="file_type"]:checked').value;
+  const provider = document.querySelector('input[name="provider"]:checked').value;
+
+  if (!career)       { showStatus('error', ERR_ICON, 'Please enter your career history.'); return; }
+  if (!filled.length){ showStatus('error', ERR_ICON, 'Please paste at least one job description.'); return; }
+
+  const multi = filled.length > 1;
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner"></div> ${multi ? 'Generating '+filled.length+' resumes…' : 'Generating your resume…'}`;
+  statusMsg.style.display = 'none';
+  setProgress(5);
+
+  try {
+    if (multi) {
+      // Process each job, accumulate files, zip at the end
+      const zip = new JSZip();
+      for (let i = 0; i < filled.length; i++) {
+        setProgress(Math.round(10 + (i / filled.length) * 80));
+        btn.innerHTML = `<div class="spinner"></div> Generating resume ${i+1} of ${filled.length}…`;
+        const content = await callGroq(career, filled[i], provider);
+        let fileBytes;
+        if (fileType === 'pdf') {
+          fileBytes = generatePDF(content);
+        } else {
+          fileBytes = await generateDOCX(content);
+        }
+        zip.file(`Resume_Target_${i+1}.${fileType}`, fileBytes);
+      }
+      setProgress(95);
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      setProgress(100);
+      download(zipBlob, 'Tailored_Resumes.zip');
+      showStatus('success', OK_ICON, `✅ ${filled.length} tailored resumes downloading as a ZIP!`);
+    } else {
+      // Animate progress during single API call
+      let prog = 5;
+      const ticker = setInterval(() => { prog = Math.min(prog + Math.random()*6, 85); setProgress(prog); }, 700);
+      const content = await callGroq(career, filled[0], provider);
+      clearInterval(ticker);
+      setProgress(90);
+      let fileBytes;
+      if (fileType === 'pdf') {
+        fileBytes = generatePDF(content);
+        download(new Blob([fileBytes]), 'resume.pdf');
+      } else {
+        fileBytes = await generateDOCX(content);
+        download(fileBytes, 'resume.docx');
+      }
+      setProgress(100);
+      showStatus('success', OK_ICON, '✅ Your resume is downloading! Generate another one for a different role anytime.');
+    }
+    resetUI();
+  } catch (err) {
+    setProgress(0);
+    const msg = err.message || 'Unknown error';
+    const friendly = msg.includes('401') ? 'Invalid API key. Please check the Groq API key.' :
+                     msg.includes('429') ? 'Rate limit reached. Please wait a moment and try again.' :
+                     msg.includes('Failed to fetch') ? 'Network error — check your internet connection.' : msg;
+    showStatus('error', ERR_ICON, friendly);
+    resetUI();
+  }
+});
+
+// ── Hamburger ────────────────────────────────────────────────────────────────
+(function () {
+  var h = document.getElementById('golana-hamburger'), d = document.getElementById('golana-dropdown');
+  h.addEventListener('click', e => { e.stopPropagation(); var o=d.classList.toggle('open'); h.setAttribute('aria-expanded',o); d.setAttribute('aria-hidden',!o); });
+  document.addEventListener('click', () => { d.classList.remove('open'); h.setAttribute('aria-expanded','false'); d.setAttribute('aria-hidden','true'); });
+  d.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { d.classList.remove('open'); h.setAttribute('aria-expanded','false'); }));
+})();
+
+// ── Scroll to top ────────────────────────────────────────────────────────────
+const scrollTopBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('visible', window.scrollY > 300), { passive: true });
+scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ── Key check on load ────────────────────────────────────────────────────────
+if (!GROQ_API_KEY || GROQ_API_KEY === '__GROQ_API_KEY__') {
+  showStatus('info', INFO_ICON, '⚙️ <strong>Setup required:</strong> The Groq API key has not been configured yet. Contact the site admin.');
+}
 </script>
 </body>
 </html>
