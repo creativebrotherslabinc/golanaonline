@@ -42,6 +42,13 @@ The workflow **Start application** is configured to run this automatically. The 
 |--------|---------|-----------------|
 | `GROQ_API_KEY` | Resume Genie | https://console.groq.com (free) |
 
+The key is used only by the Python server and is never sent to the browser.
+For GitHub-based deployments, add it once as a repository secret named
+`GROQ_API_KEY` under **Settings → Secrets and variables → Actions**. GitHub
+Actions can then read it as `${{ secrets.GROQ_API_KEY }}` without putting the
+value in source code. GitHub Pages alone cannot run the Python API server;
+Resume Genie needs a server-capable deployment target.
+
 ## User preferences
 
 _None recorded yet._

@@ -113,15 +113,14 @@ async def proxy_geocode_search(request: Request):
         raise HTTPException(status_code=502, detail=str(e))
 
 
-# ── Resume Genie page — inject API key ───────────────────────────────
+# ── Resume Genie page ─────────────────────────────────────────────────
 
 @app.get("/resume-genie/")
 @app.get("/resume-genie/index.html")
 async def rg_page():
-    """Serve Resume Genie with the Groq API key injected client-side."""
+    """Serve Resume Genie without exposing server-side configuration."""
     html = (ROOT / "resume-genie" / "index.html").read_text(encoding="utf-8")
-    key  = os.environ.get("GROQ_API_KEY", "")
-    return Response(content=html.replace("__GROQ_API_KEY__", key), media_type="text/html")
+    return Response(content=html, media_type="text/html")
 
 
 # ── Resume Genie API ──────────────────────────────────────────────────
@@ -147,6 +146,22 @@ def rg_health():
         "status": "ok",
         "groq_configured": bool(os.environ.get("GROQ_API_KEY")),
     }
+
+
+@app.post("/resume-genie/api/generate-content")
+async def rg_generate_content(
+    career_history: str = Form(...),
+    job_description: str = Form(...),
+    provider: str = Form(default="groq"),
+):
+    """Generate resume JSON while keeping GROQ_API_KEY on the server."""
+    _check_provider(provider)
+    if not career_history.strip() or not job_description.strip():
+        raise HTTPException(status_code=400, detail="Both fields are required.")
+    try:
+        return generate_resume_content(career_history, job_description, provider=provider)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {e}")
 
 
 @app.post("/resume-genie/api/generate")

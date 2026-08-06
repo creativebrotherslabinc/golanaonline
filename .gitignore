@@ -1,0 +1,15 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.venv/
+.pythonlibs/
+
+# Replit and tool caches
+.cache/
+.local/
+.agents/

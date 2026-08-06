@@ -368,7 +368,8 @@
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
-const GROQ_API_KEY = '__GROQ_API_KEY__';
+// The Groq key is intentionally never included in browser code. Generation
+// goes through the server-side API so the key remains private.
 const MODELS = {
   groq:   'llama-3.1-8b-instant',    // AI Gen A — fast
   gemini: 'llama-3.3-70b-versatile', // AI Gen B — quality
@@ -468,25 +469,20 @@ RULES:
 - Return ONLY valid JSON — no markdown fences, no explanation text`;
 
 async function callGroq(careerHistory, jobDescription, provider) {
-  const model = MODELS[provider] || MODELS.groq;
-  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const formData = new FormData();
+  formData.append('career_history', careerHistory);
+  formData.append('job_description', jobDescription);
+  formData.append('provider', provider);
+
+  const resp = await fetch('/resume-genie/api/generate-content', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages: [{ role: 'user', content: PROMPT_TEMPLATE(careerHistory, jobDescription) }], temperature: 0.3, max_tokens: 4000 })
+    body: formData
   });
   if (!resp.ok) {
     const e = await resp.json().catch(() => ({}));
-    throw new Error(e.error?.message || `Groq API error ${resp.status}`);
+    throw new Error(e.detail || `Resume API error ${resp.status}`);
   }
-  let text = (await resp.json()).choices[0].message.content.trim();
-  // Strip markdown fences if present
-  if (text.startsWith('```')) text = text.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
-  try { return JSON.parse(text); }
-  catch {
-    const s = text.indexOf('{'), e = text.lastIndexOf('}');
-    if (s !== -1 && e > s) return JSON.parse(text.slice(s, e + 1));
-    throw new Error('Could not parse AI response as JSON.');
-  }
+  return resp.json();
 }
 
 // ── PDF generation (jsPDF) ───────────────────────────────────────────────────
@@ -721,11 +717,6 @@ function download(blobOrBuffer, filename) {
 form.addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  if (!GROQ_API_KEY || GROQ_API_KEY === '__GROQ_API_KEY__') {
-    showStatus('error', ERR_ICON, '⚠️ API key not configured. The site admin needs to embed the Groq API key.');
-    return;
-  }
-
   const career   = document.getElementById('career').value.trim();
   const filled   = filledJobs();
   const fileType = document.querySelector('input[name="file_type"]:checked').value;
@@ -804,10 +795,17 @@ const scrollTopBtn = document.getElementById('scrollTop');
 window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('visible', window.scrollY > 300), { passive: true });
 scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-// ── Key check on load ────────────────────────────────────────────────────────
-if (!GROQ_API_KEY || GROQ_API_KEY === '__GROQ_API_KEY__') {
-  showStatus('info', INFO_ICON, '⚙️ <strong>Setup required:</strong> The Groq API key has not been configured yet. Contact the site admin.');
-}
+// ── Server configuration check on load ──────────────────────────────────────
+fetch('/resume-genie/api/healthz')
+  .then(response => response.ok ? response.json() : null)
+  .then(health => {
+    if (health && !health.groq_configured) {
+      showStatus('info', INFO_ICON, '⚙️ <strong>Setup required:</strong> The server administrator needs to configure the Groq API key.');
+    }
+  })
+  .catch(() => {
+    // The form will show a useful error if the API is unavailable.
+  });
 </script>
 </body>
 </html>
