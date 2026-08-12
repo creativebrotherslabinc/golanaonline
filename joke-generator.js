@@ -180,16 +180,6 @@
     card.textContent = '"' + result.joke + '"';
     card.setAttribute("aria-live", "polite");
 
-    var note = document.querySelector("[data-golana-joke-library-note]");
-    if (!note) {
-      note = document.createElement("p");
-      note.setAttribute("data-golana-joke-library-note", "true");
-      note.className = "text-sm text-muted-foreground mt-3";
-      card.insertAdjacentElement("afterend", note);
-    }
-    note.textContent = "Joke " + result.number.toLocaleString() +
-      " of " + result.total.toLocaleString() +
-      " in this category — your browser remembers your place.";
   }
 
   function enhancePage() {
