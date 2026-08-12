@@ -73,6 +73,7 @@ const state = {
   },
   pool:         [],   // broad pre-fetch for facet highlighting
   poolLoading:  false,
+  poolReady:    false, // true only after the latest restaurant pool request finishes
   restaurants:  [],
   currentRotation: 0,
   isSpinning:   false,
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupButtons();
   setupEventListeners();
+  updateFindButton();
   requestGeolocation();
 });
 
@@ -321,10 +323,12 @@ function resetLocation() {
   state.lat = state.lon = null;
   state.locationLabel = '';
   state.pool = [];
+  state.poolReady = false;
   _geoRequested = false;
   _clearGeoTimer();
   document.getElementById('location-confirmed').classList.add('hidden');
   setPoolStatus('');
+  updateFindButton();
   // Show GPS button + manual input together — let user pick
   showManualLocation(true);
   // Clear any previous manual entry
@@ -403,7 +407,11 @@ async function geocodeManualLocation() {
 // Triggered whenever location or radius changes, or pub/brewery mode toggles.
 
 async function fetchPool() {
-  if (!state.lat || !state.lon) return;
+  if (!state.lat || !state.lon) {
+    state.poolReady = false;
+    updateFindButton();
+    return;
+  }
 
   // Cancel any in-flight fetch
   if (poolFetchController) poolFetchController.abort();
@@ -412,7 +420,9 @@ async function fetchPool() {
 
   state.pool = [];
   state.poolLoading = true;
+  state.poolReady = false;
   setPoolStatus('loading');
+  updateFindButton();
 
   try {
     const radius = Math.max(parseInt(state.prefs.radius) || 5000, 2000);
@@ -423,14 +433,37 @@ async function fetchPool() {
     state.pool = parseRestaurants(data);
     state.pool.forEach(r => { r.openStatus = parseOpeningHours(r.openingHoursRaw); });
     state.poolLoading = false;
+    state.poolReady = true;
     setPoolStatus('ready');
+    updateFindButton();
     updateFacets();
   } catch (e) {
     if (e.name === 'AbortError') return;
     console.warn('Pool fetch failed:', e);
     state.poolLoading = false;
+    state.poolReady = false;
     setPoolStatus('');
+    updateFindButton();
   }
+}
+
+function updateFindButton() {
+  const btn = document.getElementById('btn-find');
+  if (!btn) return;
+
+  const ready = Boolean(
+    state.lat &&
+    state.lon &&
+    state.poolReady &&
+    !state.poolLoading
+  );
+
+  btn.disabled = !ready;
+  btn.classList.toggle('find-button-loading', !ready);
+  btn.setAttribute('aria-disabled', String(!ready));
+  btn.title = ready
+    ? 'Find restaurants using your selected filters'
+    : 'Please wait while nearby restaurants are loading';
 }
 
 function setPoolStatus(status) {

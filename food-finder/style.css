@@ -482,6 +482,12 @@ body {
 }
 .btn-primary:active  { transform: translateY(0); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary.find-button-loading:disabled {
+  background: #aeb4bb;
+  color: #f5f6f7;
+  box-shadow: none;
+  opacity: 1;
+}
 
 .btn-secondary {
   display: inline-flex;
