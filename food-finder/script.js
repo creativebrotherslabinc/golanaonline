@@ -74,6 +74,7 @@ const state = {
   pool:         [],   // broad pre-fetch for facet highlighting
   poolLoading:  false,
   poolReady:    false, // true only after the latest restaurant pool request finishes
+  poolError:    false, // true when the facet scan failed; search can still run
   restaurants:  [],
   currentRotation: 0,
   isSpinning:   false,
@@ -324,6 +325,7 @@ function resetLocation() {
   state.locationLabel = '';
   state.pool = [];
   state.poolReady = false;
+  state.poolError = false;
   _geoRequested = false;
   _clearGeoTimer();
   document.getElementById('location-confirmed').classList.add('hidden');
@@ -425,7 +427,7 @@ async function fetchPool() {
   updateFindButton();
 
   try {
-    const radius = Math.max(parseInt(state.prefs.radius) || 5000, 2000);
+    const radius = parseInt(state.prefs.radius) || 5000;
     const query  = buildPoolQuery(radius);
     const data   = await runOverpassQuery(query, signal);
     if (signal.aborted) return;
@@ -434,6 +436,7 @@ async function fetchPool() {
     state.pool.forEach(r => { r.openStatus = parseOpeningHours(r.openingHoursRaw); });
     state.poolLoading = false;
     state.poolReady = true;
+    state.poolError = false;
     setPoolStatus('ready');
     updateFindButton();
     updateFacets();
@@ -442,7 +445,8 @@ async function fetchPool() {
     console.warn('Pool fetch failed:', e);
     state.poolLoading = false;
     state.poolReady = false;
-    setPoolStatus('');
+    state.poolError = true;
+    setPoolStatus('error');
     updateFindButton();
   }
 }
@@ -454,8 +458,8 @@ function updateFindButton() {
   const ready = Boolean(
     state.lat &&
     state.lon &&
-    state.poolReady &&
-    !state.poolLoading
+    !state.poolLoading &&
+    (state.poolReady || state.poolError)
   );
 
   btn.disabled = !ready;
@@ -472,6 +476,9 @@ function setPoolStatus(status) {
   if (status === 'loading') {
     el.textContent = '· scanning nearby…';
     el.className   = 'pool-status pool-loading';
+  } else if (status === 'error') {
+    el.textContent = '· scan unavailable — search is still available';
+    el.className   = 'pool-status pool-error';
   } else if (status === 'ready' && state.pool.length) {
     el.textContent = `· ${state.pool.length} nearby`;
     el.className   = 'pool-status';
@@ -748,14 +755,28 @@ function buildOverpassQuery(cuisines, radius) {
 }
 
 async function runOverpassQuery(query, signal) {
-  // Call Overpass directly — works from any static host (CORS allowed)
+  // Use the same-origin server proxy instead of calling Overpass from the
+  // browser. Direct Overpass requests are not consistently CORS-enabled,
+  // which leaves the pool in a loading state and keeps Find My Food disabled.
   const opts = {
     method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body:    'data=' + encodeURIComponent(query),
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ query }),
   };
   if (signal) opts.signal = signal;
-  const res = await fetch('https://overpass-api.de/api/interpreter', opts);
+  const timeout = new AbortController();
+  const timeoutId = setTimeout(() => timeout.abort(), 20000);
+  const requestSignal = signal
+    ? AbortSignal.any([signal, timeout.signal])
+    : timeout.signal;
+  opts.signal = requestSignal;
+
+  let res;
+  try {
+    res = await fetch('/api/overpass', opts);
+  } finally {
+    clearTimeout(timeoutId);
+  }
   if (!res.ok) throw new Error(`Overpass ${res.status}`);
   return res.json();
 }
